@@ -23,7 +23,6 @@ export default function SignIn() {
     // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
     const data = new FormData(event.currentTarget);
     const body = {
-      username: data.get("username"),
       email: data.get("email"),
       password: data.get("password"),
     };
@@ -98,7 +97,7 @@ export default function SignIn() {
           </Button>
 
           <Link href="/sign-up" variant="body2">
-            Dont have an account? Sign up
+            Don't have an account? Sign up
           </Link>
         </Box>
         {error && <Alert sx={{mt: 2}} severity="error">{error}</Alert>}
