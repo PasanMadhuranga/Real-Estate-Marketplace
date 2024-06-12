@@ -1,32 +1,32 @@
-import {FaSearch} from 'react-icons/fa'
-import { Link } from 'react-router-dom'
-export default function Header(){
-    return(
-        <header className="shadow-md bg-slate-200">
-            <div className="flex items-center justify-between max-w-6xl p-3 mx-auto">
-            <Link to='/' >
-            <h1 className="flex flex-wrap text-sm font-bold sm:text-xl">
-                <span className="text-slate-500">Real</span>
-                <span className="text-slate-700">Estate</span>
-            </h1>
-            </Link>
-            <form action="" className="flex items-center w-24 p-3 rounded-lg bg-slate-100 sm:w-64">
-                <input type="text" placeholder="Search..." className="bg-transparent focus:outline-none"/>
-                <FaSearch className='text-slate-600'/>
-            </form>
-            <ul className='flex gap-4'>
-                <Link to='/' >
-                <li className='hidden sm:inline text-slate-700 hover:underline'>Home</li>
-                </Link>
-                <Link to='/about' >
-                <li className='hidden sm:inline text-slate-700 hover:underline'>About</li>
-                </Link>
-                <Link to='/sign-in' >
-                <li className=' sm:inline text-slate-700 hover:underline'>Sign in</li>
-                </Link>
-                
-            </ul>
-            </div>
-        </header>
-    )
+import React from 'react';
+import { AppBar, Toolbar, Typography, Button, IconButton, InputBase, Box } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import { Link } from 'react-router-dom';
+
+export default function Header() {
+    return (
+        <AppBar position="static" color='default' elevation={1}  >
+            <Toolbar>
+                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="h6" noWrap component={Link} to="/" sx={{ textDecoration: 'none', color: 'inherit' }}>
+                        <span>Real</span>
+                        <span>Estate</span>
+                    </Typography>
+                </Box>
+                <Box sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 'auto', border:'1px solid ', borderRadius:'10px'}}>
+                    <InputBase
+                        sx={{ ml: 1, flex: 1 }}
+                        placeholder="Search..."
+                        inputProps={{ 'aria-label': 'search' }}
+                    />
+                    <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
+                        <SearchIcon />
+                    </IconButton>
+                </Box>
+                <Button color="inherit" component={Link} to="/">Home</Button>
+                <Button color="inherit" component={Link} to="/about">About</Button>
+                <Button color="inherit" component={Link} to="/sign-in">Sign in</Button>
+            </Toolbar>
+        </AppBar>
+    );
 }
