@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
@@ -6,10 +6,19 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import Alert from '@mui/material/Alert';
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function SignUp() {
+
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
     // FormData is a built-in JavaScript object that easily captures the data from the form fields.
     // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
     const data = new FormData(event.currentTarget);
@@ -19,21 +28,23 @@ export default function SignUp() {
       password: data.get("password"),
     };
 
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+    try {
+      await axios.post("/api/auth/signup", body, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setLoading(false);
+      setError(null);
+      navigate("/sign-in");
+    } catch (error) {
+      setLoading(false);
+      setError(error.response.data.message);
+    }
     // "/api/users": The URL to which the request is sent. This is typically an endpoint on your server that handles user registration.
     // method: "POST": Specifies that this is a POST request, meaning data will be sent to the server.
     // headers: {"Content-Type": "application/json"}: Sets the Content-Type header to application/json, indicating that the request body contains JSON data.
     // body: JSON.stringify(body): Converts the body object (which contains the form data) to a JSON string to be sent as the request body.
-
-    // The response from the server is stored in the res variable. The response object contains information about the response, such as the status code and the response body.
-    const response = await res.json();
-    console.log(response);
   };
 
   return (
@@ -91,14 +102,16 @@ export default function SignUp() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={loading}
           >
-            Sign Up
+            {loading ? "Loading..." : "Sign Up"}
           </Button>
 
           <Link href="/sign-in" variant="body2">
             Already have an account? Sign in
           </Link>
         </Box>
+        {error && <Alert sx={{mt: 2}} severity="error">{error}</Alert>}
       </Box>
     </Container>
   );
