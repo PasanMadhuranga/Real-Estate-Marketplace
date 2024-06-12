@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
@@ -9,16 +8,19 @@ import Container from "@mui/material/Container";
 import Alert from '@mui/material/Alert';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice";
+
 
 export default function SignIn() {
 
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const {loading, error} = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
+    dispatch(signInStart());
     // FormData is a built-in JavaScript object that easily captures the data from the form fields.
     // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
     const data = new FormData(event.currentTarget);
@@ -28,17 +30,16 @@ export default function SignIn() {
     };
 
     try {
-      await axios.post("/api/auth/signin", body, {
+      const response = await axios.post("/api/auth/signin", body, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      setLoading(false);
-      setError(null);
+      console.log(response.data);
+      dispatch(signInSuccess(response.data));
       navigate("/");
     } catch (error) {
-      setLoading(false);
-      setError(error.response.data.message);
+      dispatch(signInFailure(error.response.data.message));
     }
     // "/api/users": The URL to which the request is sent. This is typically an endpoint on your server that handles user registration.
     // method: "POST": Specifies that this is a POST request, meaning data will be sent to the server.
