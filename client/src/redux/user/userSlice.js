@@ -28,3 +28,5 @@ const userSlice = createSlice({
 export const { signInStart, signInSuccess, signInFailure } = userSlice.actions;
 
 export default userSlice.reducer;
+
+// Reducer: A pure function that takes the current state and an action, then returns a new state based on the action type and payload.

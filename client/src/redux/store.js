@@ -18,11 +18,16 @@ const rootReducer = combineReducers({
   user: userReducer,
 });
 
+// persistConfig: Specifies the configuration options for the state persistence, including the key, storage engine, and version.
 const persistConfig = {
   key: "root",
   storage,
   version: 1,
 };
+// key: Specifies the key for the persisted state in local storage. Using "root" means the entire Redux state will be stored under this key.
+// storage: Specifies the storage engine, which is local storage in this case.
+// version: Specifies the version of the persisted state. This can be useful for managing migrations when the state schema changes.
+
 
 // State Persistence: Enhances the root reducer with persistence capabilities using redux-persist, allowing the state to be saved to and loaded from local storage.
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -46,3 +51,13 @@ export const store = configureStore({
 // persistStore: Creates a persistor object that controls the persistence layer of the store. 
 // This is typically used to purge or rehydrate the state and manage the persistence lifecycle.
 export const persistor = persistStore(store);
+
+
+// Key Differences Between Redux Store and Cookies:
+// Purpose:
+// Redux store: Manages application state in a predictable way within the application.
+// Cookies: Store small pieces of data that need to be shared between client and server.
+
+// Scope:
+// Redux store: Exists within the application lifecycle, not shared with the server.
+// Cookies: Shared between client and server, sent with every relevant HTTP request.

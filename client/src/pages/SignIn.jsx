@@ -35,7 +35,6 @@ export default function SignIn() {
           "Content-Type": "application/json",
         },
       });
-      console.log(response.data);
       dispatch(signInSuccess(response.data));
       navigate("/");
     } catch (error) {
