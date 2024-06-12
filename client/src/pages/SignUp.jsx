@@ -7,15 +7,28 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
-
 export default function SignUp() {
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    // FormData is a built-in JavaScript object that easily captures the data from the form fields.
+    // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
     const data = new FormData(event.currentTarget);
-    console.log({
+    const body = {
+      username: data.get("username"),
       email: data.get("email"),
       password: data.get("password"),
+    };
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     });
+    // "/api/users": The URL to which the request is sent. This is typically an endpoint on your server that handles user registration.
+    // method: "POST": Specifies that this is a POST request, meaning data will be sent to the server.
+    // headers: {"Content-Type": "application/json"}: Sets the Content-Type header to application/json, indicating that the request body contains JSON data.
+    // body: JSON.stringify(body): Converts the body object (which contains the form data) to a JSON string to be sent as the request body.
   };
 
   return (
