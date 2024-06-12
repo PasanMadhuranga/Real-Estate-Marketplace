@@ -18,7 +18,8 @@ export default function SignUp() {
       email: data.get("email"),
       password: data.get("password"),
     };
-    const res = await fetch("/api/users", {
+
+    const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -29,6 +30,10 @@ export default function SignUp() {
     // method: "POST": Specifies that this is a POST request, meaning data will be sent to the server.
     // headers: {"Content-Type": "application/json"}: Sets the Content-Type header to application/json, indicating that the request body contains JSON data.
     // body: JSON.stringify(body): Converts the body object (which contains the form data) to a JSON string to be sent as the request body.
+
+    // The response from the server is stored in the res variable. The response object contains information about the response, such as the status code and the response body.
+    const response = await res.json();
+    console.log(response);
   };
 
   return (
@@ -44,7 +49,7 @@ export default function SignUp() {
         <Typography component="h1" variant="h3">
           Sign up
         </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
@@ -54,7 +59,7 @@ export default function SignUp() {
                 id="username"
                 label="Username"
                 autoFocus
-                variant="filled"
+                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
@@ -64,8 +69,8 @@ export default function SignUp() {
                 id="email"
                 label="Email Address"
                 name="email"
-                autoComplete="email"
-                variant="filled"
+                // autoComplete="email"
+                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
@@ -76,8 +81,8 @@ export default function SignUp() {
                 label="Password"
                 type="password"
                 id="password"
-                autoComplete="new-password"
-                variant="filled"
+                // autoComplete="new-password"
+                variant="outlined"
               />
             </Grid>
           </Grid>
@@ -89,13 +94,10 @@ export default function SignUp() {
           >
             Sign Up
           </Button>
-          <Grid container>
-            <Grid item>
-              <Link href="/sign-in" variant="body2">
-                Already have an account? Sign in
-              </Link>
-            </Grid>
-          </Grid>
+
+          <Link href="/sign-in" variant="body2">
+            Already have an account? Sign in
+          </Link>
         </Box>
       </Box>
     </Container>
