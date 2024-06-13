@@ -2,8 +2,11 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button, IconButton, InputBase, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import Avatar from '@mui/material/Avatar';
 
 export default function Header() {
+    const { currentUser } = useSelector((state) => state.user);
     return (
         <AppBar position="static" color='default' elevation={1}  >
             <Toolbar>
@@ -25,7 +28,13 @@ export default function Header() {
                 </Box>
                 <Button color="inherit" component={Link} to="/">Home</Button>
                 <Button color="inherit" component={Link} to="/about">About</Button>
-                <Button color="inherit" component={Link} to="/sign-in">Sign in</Button>
+                {
+                    currentUser ? (
+                        <Avatar src={currentUser.avatar} alt="profile" sx={{ width: 40, height: 40 }} component={Link} to="/profile"/>
+                    ) : (
+                        <Button color="inherit" component={Link} to="/sign-in">SIGN IN</Button>
+                    )
+                }
             </Toolbar>
         </AppBar>
     );
