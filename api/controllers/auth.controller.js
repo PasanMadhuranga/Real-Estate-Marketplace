@@ -63,6 +63,7 @@ export const google = async (req, res, next) => {
         .status(200)
         .json(restOfUser);
     } else {
+      // This line generates a 16-character password using two random strings.
       const generatedPassword =
         Math.random().toString(36).slice(-8) +
         Math.random().toString(36).slice(-8);
