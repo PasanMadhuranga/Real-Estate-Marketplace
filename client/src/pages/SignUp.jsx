@@ -9,6 +9,7 @@ import Container from "@mui/material/Container";
 import Alert from '@mui/material/Alert';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import OAuth from "../components/OAuth";
 
 export default function SignUp() {
 
@@ -106,6 +107,7 @@ export default function SignUp() {
           >
             {loading ? "Loading..." : "Sign Up"}
           </Button>
+          <OAuth />
 
           <Link href="/sign-in" variant="body2">
             Already have an account? Sign in
