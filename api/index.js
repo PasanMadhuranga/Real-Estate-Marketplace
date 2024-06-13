@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import listingRouter from "./routes/listing.route.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,9 @@ mongoose
   });
 
 app.use(express.json());
+//The cookieParser() middleware parses the Cookie header of incoming requests and populates req.cookies with an object keyed by the cookie names
+//This middleware is essential for working with cookies in a Node.js application using the Express framework
+app.use(cookieParser())
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use('/api/listing', listingRouter);
