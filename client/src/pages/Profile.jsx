@@ -5,14 +5,24 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import Alert from '@mui/material/Alert';
+import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
-import Avatar from '@mui/material/Avatar';
+import Avatar from "@mui/material/Avatar";
 import { useSelector } from "react-redux";
 import { useRef } from "react";
 import { useEffect } from "react";
-import  {app} from "../firebase";
-import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserStart, deleteUserSuccess, deleteUserFailure } from "../redux/user/userSlice";
+import { app } from "../firebase";
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+  signOutUserStart,
+  signOutUserSuccess,
+  signOutUserFailure,
+} from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import {
@@ -20,12 +30,12 @@ import {
   getStorage,
   ref,
   uploadBytesResumable,
-} from 'firebase/storage';
+} from "firebase/storage";
 
 export default function Profile() {
   const fileRef = useRef(null);
   //get the current user to get the avatar
-  const {currentUser, loading, error } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   //this is for the file that will be uploaded
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
@@ -37,38 +47,40 @@ export default function Profile() {
 
   //this useEffect is used to upload the file to the firebase storage
   useEffect(() => {
-    if(file){
+    if (file) {
       handleFileUpload(file);
     }
-    }, [file])
-  
+  }, [file]);
+
   const handleFileUpload = (file) => {
     const storage = getStorage(app);
     const fileName = new Date().getTime() + file.name; //unique name for the file
-    const storageRef = ref(storage,fileName); // the path where the file will be saved
-    //This function starts the upload of the file to the specified storage reference (storageRef). 
+    const storageRef = ref(storage, fileName); // the path where the file will be saved
+    //This function starts the upload of the file to the specified storage reference (storageRef).
     //It returns an UploadTask which can be used to monitor and control the upload process.
     const uploadTask = uploadBytesResumable(storageRef, file); // the task of uploading the file
-    //The on method is an event listener that listens for changes in the state of the upload task. 
+    //The on method is an event listener that listens for changes in the state of the upload task.
     //The 'state_changed' event fires multiple times during the upload process to provide updates on the upload status.
     //The on method for the 'state_changed' event takes three callback functions as arguments:
-    uploadTask.on('state_changed',(snapshot) => {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setFilePerc(Math.round(progress));
+        setFilePerc(Math.round(progress));
       },
       (error) => {
         setFileUploadError(true);
       },
       () => {
         //getDownloadURL(uploadTask.snapshot.ref) retrieves the download URL for the uploaded file.
-        getDownloadURL(uploadTask.snapshot.ref)
-        .then((downloadURL) => setFormData({ ...formData, avatar: downloadURL }));
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
+          setFormData({ ...formData, avatar: downloadURL })
+        );
       }
     );
   };
-  
-  
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     dispatch(updateUserStart());
@@ -80,11 +92,15 @@ export default function Profile() {
       avatar: formData.avatar || currentUser.avatar,
     };
     try {
-      const response = await axios.post(`/api/user/update/${currentUser._id}`, body, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        `/api/user/update/${currentUser._id}`,
+        body,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.success === false) {
         dispatch(updateUserFailure(response.message));
@@ -100,7 +116,9 @@ export default function Profile() {
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
-      const response = await axios.delete(`/api/user/delete/${currentUser._id}`);
+      const response = await axios.delete(
+        `/api/user/delete/${currentUser._id}`
+      );
       if (response.success === false) {
         dispatch(deleteUserFailure(response.message));
         return;
@@ -109,7 +127,20 @@ export default function Profile() {
     } catch (error) {
       dispatch(deleteUserFailure(error.message));
     }
-      
+  };
+
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const response = await axios.get("/api/auth/signout");
+      if (response.success === false) {
+        dispatch(signOutUserFailure(response.message));
+        return;
+      }
+      dispatch(signOutUserSuccess());
+    } catch (error) {
+      dispatch(signOutUserFailure(error.message));
+    }
   }
 
   return (
@@ -127,22 +158,33 @@ export default function Profile() {
         </Typography>
         {/* fileRef.current gives direct access to the file input element because fileRef is a reference to that element.
         fileRef.current.click() programmatically triggers a click event on the hidden file input element. This opens the file dialog, allowing the user to select a file. */}
-        <input onChange={(evt) => setFile(evt.target.files[0])}  type="file" ref={fileRef} hidden accept="image/*"/>
-        <Avatar onClick={() => fileRef.current.click()}  src={formData.avatar || currentUser.avatar} alt="profile" sx={{ mt: 2, bgcolor: 'secondary.main', width: 100, height: 100 }}/>
-         {/* //this p elemnt implements the showing of the progress of the file upload */}
-         <p>
+        <input
+          onChange={(evt) => setFile(evt.target.files[0])}
+          type="file"
+          ref={fileRef}
+          hidden
+          accept="image/*"
+        />
+        <Avatar
+          onClick={() => fileRef.current.click()}
+          src={formData.avatar || currentUser.avatar}
+          alt="profile"
+          sx={{ mt: 2, bgcolor: "secondary.main", width: 100, height: 100 }}
+        />
+        {/* //this p elemnt implements the showing of the progress of the file upload */}
+        <p>
           {fileUploadError ? (
-              <span className="text-red-700">
-                Error Image upload (image must be less than 2 mb)
-              </span>
-            ) : filePerc > 0 && filePerc < 100 ? (
-              <span >{`Uploading ${filePerc}%`}</span>
-            ) : filePerc === 100 ? (
-              <span className="text-green-700" >Image successfully uploaded!</span>
-            ) : (
-              ''
-            )}
-         </p>
+            <span className="text-red-700">
+              Error Image upload (image must be less than 2 mb)
+            </span>
+          ) : filePerc > 0 && filePerc < 100 ? (
+            <span>{`Uploading ${filePerc}%`}</span>
+          ) : filePerc === 100 ? (
+            <span className="text-green-700">Image successfully uploaded!</span>
+          ) : (
+            ""
+          )}
+        </p>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -168,7 +210,6 @@ export default function Profile() {
                 // autoComplete="email"
                 variant="outlined"
                 defaultValue={currentUser.email}
-                
               />
             </Grid>
             <Grid item xs={12}>
@@ -181,7 +222,6 @@ export default function Profile() {
                 id="password"
                 // autoComplete="new-password"
                 variant="outlined"
-                
               />
             </Grid>
           </Grid>
@@ -195,26 +235,40 @@ export default function Profile() {
             {loading ? "Loading..." : "UPDATE"}
           </Button>
 
-          <Grid container display='flex' justifyContent="space-between">
-
-            <Grid item xs={6} sx={{ textAlign: 'left' }}>
-            <Button variant="text" color="error" sx={{ textTransform: 'none', pl:1  }} onClick={handleDeleteUser}>
-              Delete Account
-            </Button>
+          <Grid container display="flex" justifyContent="space-between">
+            <Grid item xs={6} sx={{ textAlign: "left" }}>
+              <Button
+                variant="text"
+                color="error"
+                sx={{ textTransform: "none", pl: 1 }}
+                onClick={handleDeleteUser}
+              >
+                Delete Account
+              </Button>
             </Grid>
 
-            <Grid item xs={6} style={{ textAlign: 'right' }}>
-            <Button variant="text"color="error" sx={{ textTransform: 'none', pr:1 }} >
-              Sign out
-            </Button>
+            <Grid item xs={6} style={{ textAlign: "right" }}>
+              <Button
+                variant="text"
+                color="error"
+                sx={{ textTransform: "none", pr: 1 }}
+                onClick={handleSignOut}
+              >
+                Sign out
+              </Button>
             </Grid>
-
           </Grid>
-
-          
         </Box>
-        {error && <Alert sx={{mt: 2}} severity="error">{error}</Alert>}
-        {updateSuccess && <Alert sx={{mt: 2}} severity="success">Profile updated successfully</Alert>}
+        {error && (
+          <Alert sx={{ mt: 2 }} severity="error">
+            {error}
+          </Alert>
+        )}
+        {updateSuccess && (
+          <Alert sx={{ mt: 2 }} severity="success">
+            Profile updated successfully
+          </Alert>
+        )}
       </Box>
     </Container>
   );
