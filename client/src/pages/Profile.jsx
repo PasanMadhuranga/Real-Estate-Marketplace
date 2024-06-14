@@ -25,18 +25,15 @@ import {
 export default function Profile() {
   const fileRef = useRef(null);
   //get the current user to get the avatar
-  const {currentUser} = useSelector((state) => state.user);
+  const {currentUser, loading, error } = useSelector((state) => state.user);
   //this is for the file that will be uploaded
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+  const [updateSuccess, setUpdateSuccess] = useState(false);
   //initialize dispatch to use it to dispatch actions
   const dispatch = useDispatch();
-
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   //this useEffect is used to upload the file to the firebase storage
   useEffect(() => {
@@ -94,7 +91,7 @@ export default function Profile() {
         return;
       }
       dispatch(updateUserSuccess(response.data)); // The object that we pass here will be the payload of the action in the reducer
-      navigate("/profile")
+      setUpdateSuccess(true);
     } catch (error) {
       dispatch(updateUserFailure(error.message));
     }
@@ -120,13 +117,13 @@ export default function Profile() {
          {/* //this p elemnt implements the showing of the progress of the file upload */}
          <p>
           {fileUploadError ? (
-              <span >
+              <span className="text-red-700">
                 Error Image upload (image must be less than 2 mb)
               </span>
             ) : filePerc > 0 && filePerc < 100 ? (
               <span >{`Uploading ${filePerc}%`}</span>
             ) : filePerc === 100 ? (
-              <span >Image successfully uploaded!</span>
+              <span className="text-green-700" >Image successfully uploaded!</span>
             ) : (
               ''
             )}
@@ -202,6 +199,7 @@ export default function Profile() {
           
         </Box>
         {error && <Alert sx={{mt: 2}} severity="error">{error}</Alert>}
+        {updateSuccess && <Alert sx={{mt: 2}} severity="success">Profile updated successfully</Alert>}
       </Box>
     </Container>
   );
