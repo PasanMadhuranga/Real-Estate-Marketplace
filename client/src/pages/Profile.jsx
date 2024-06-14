@@ -234,6 +234,18 @@ export default function Profile() {
             {loading ? "Loading..." : "UPDATE"}
           </Button>
 
+          <Button
+            type="text"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 1, mb: 2 , backgroundColor:'green' }}
+            disabled={loading}
+            href="/create-listing"
+          >
+            Create Listing
+          </Button>
+          
+
           <Grid container display="flex" justifyContent="space-between">
             <Grid item xs={6} sx={{ textAlign: "left" }}>
               <Button
