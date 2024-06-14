@@ -11,7 +11,12 @@ export const signup = async (req, res, next) => {
   //if there are duplicate emails, the user will not be saved
   try {
     await newUser.save();
-    res.status(201).json("User created successfully");
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+    const { password: hashedPassword, ...restOfUser } = newUser;
+    res
+      .cookie("access_token", token, { httpOnly: true })
+      .status(200)
+      .json(restOfUser);
   } catch (error) {
     next(error);
     // res.status(500).json(error.message);

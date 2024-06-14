@@ -101,15 +101,14 @@ export default function Profile() {
           },
         }
       );
-
       if (response.success === false) {
         dispatch(updateUserFailure(response.message));
         return;
       }
       dispatch(updateUserSuccess(response.data)); // The object that we pass here will be the payload of the action in the reducer
-      setUpdateSuccess(true);
+      setUpdateSuccess(true); // This is used to show the success message
     } catch (error) {
-      dispatch(updateUserFailure(error.message));
+      dispatch(updateUserFailure(error.response.data.message));
     }
   };
 
@@ -125,7 +124,7 @@ export default function Profile() {
       }
       dispatch(deleteUserSuccess());
     } catch (error) {
-      dispatch(deleteUserFailure(error.message));
+      dispatch(deleteUserFailure(error.response.data.message));
     }
   };
 
@@ -134,14 +133,14 @@ export default function Profile() {
       dispatch(signOutUserStart());
       const response = await axios.get("/api/auth/signout");
       if (response.success === false) {
-        dispatch(signOutUserFailure(response.message));
+        dispatch(signOutUserFailure(response.response.data.message));
         return;
       }
       dispatch(signOutUserSuccess());
     } catch (error) {
-      dispatch(signOutUserFailure(error.message));
+      dispatch(signOutUserFailure(error.response.data.message));
     }
-  }
+  };
 
   return (
     <Container component="main" maxWidth="xs">

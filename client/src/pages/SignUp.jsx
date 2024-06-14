@@ -6,20 +6,28 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import Alert from '@mui/material/Alert';
+import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import OAuth from "../components/OAuth";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  signUpStart,
+  signUpSuccess,
+  signUpFailure,
+} from "../redux/user/userSlice";
 
 export default function SignUp() {
+  // const [error, setError] = useState(null);
+  // const [loading, setLoading] = useState(false);
+  const { error, loading } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
+    dispatch(signUpStart());
     // FormData is a built-in JavaScript object that easily captures the data from the form fields.
     // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
     const data = new FormData(event.currentTarget);
@@ -30,17 +38,16 @@ export default function SignUp() {
     };
 
     try {
-      await axios.post("/api/auth/signup", body, {
+      const response = await axios.post("/api/auth/signup", body, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      setLoading(false);
-      setError(null);
-      navigate("/sign-in");
+      dispatch(signUpSuccess(response.data));
+      navigate("/");
     } catch (error) {
-      setLoading(false);
-      setError(error.response.data.message);
+      // this error is an Axios error object, which contains a response object with the error message.
+      dispatch(signUpFailure(error.response.data.message));
     }
     // "/api/users": The URL to which the request is sent. This is typically an endpoint on your server that handles user registration.
     // method: "POST": Specifies that this is a POST request, meaning data will be sent to the server.
@@ -113,7 +120,11 @@ export default function SignUp() {
             Already have an account? Sign in
           </Link>
         </Box>
-        {error && <Alert sx={{mt: 2}} severity="error">{error}</Alert>}
+        {error && (
+          <Alert sx={{ mt: 2 }} severity="error">
+            {error}
+          </Alert>
+        )}
       </Box>
     </Container>
   );

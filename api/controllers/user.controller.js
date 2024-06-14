@@ -6,8 +6,8 @@ export const updateUser = async (req, res, next) => {
   if(req.user.id !== req.params.id) return next(errorHandler(401, "You can update only your account" ));
   
   try {
+    // if the user has sent a password, we hash it and update the user
     let updateUserInfo;
-    //if the user wants to update the password, we hash it
     if(req.body.password){
       req.body.password = await bcryptjs.hash(req.body.password, 10);
       updateUserInfo = {
@@ -16,7 +16,9 @@ export const updateUser = async (req, res, next) => {
         password: req.body.password,
         avatar: req.body.avatar,
       }
-    } else {
+    }
+    // if the user has not sent a password, we update the user without the password 
+    else {
       updateUserInfo = {
         username: req.body.username,
         email: req.body.email,

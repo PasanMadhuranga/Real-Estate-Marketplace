@@ -10,6 +10,18 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
+    signUpStart: (state) => {
+      state.loading = true;
+    },
+    signUpSuccess: (state, action) => {
+      state.currentUser = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
+    signUpFailure: (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+    },
     signInStart: (state) => {
       state.loading = true;
     },
@@ -39,7 +51,7 @@ const userSlice = createSlice({
       state.loading = true;
     },
     deleteUserSuccess: (state) => {
-      state.currentUser = null;
+      state.currentUser = null; // This is to clear the user data from the state
       state.loading = false;
       state.error = null;
     },
@@ -75,6 +87,9 @@ export const {
   signOutUserStart,
   signOutUserSuccess,
   signOutUserFailure,
+  signUpStart,
+  signUpSuccess,
+  signUpFailure,
 } = userSlice.actions;
 
 export default userSlice.reducer;
