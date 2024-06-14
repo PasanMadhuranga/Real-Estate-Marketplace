@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 import { useRef } from "react";
 import { useEffect } from "react";
 import  {app} from "../firebase";
-import { updateUserStart, updateUserSuccess, updateUserFailure } from "../redux/user/userSlice";
+import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserStart, deleteUserSuccess, deleteUserFailure } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import {
@@ -96,6 +96,21 @@ export default function Profile() {
       dispatch(updateUserFailure(error.message));
     }
   };
+
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const response = await axios.delete(`/api/user/delete/${currentUser._id}`);
+      if (response.success === false) {
+        dispatch(deleteUserFailure(response.message));
+        return;
+      }
+      dispatch(deleteUserSuccess());
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
+      
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -183,7 +198,7 @@ export default function Profile() {
           <Grid container display='flex' justifyContent="space-between">
 
             <Grid item xs={6} sx={{ textAlign: 'left' }}>
-            <Button variant="text" color="error" sx={{ textTransform: 'none', pl:1  }} >
+            <Button variant="text" color="error" sx={{ textTransform: 'none', pl:1  }} onClick={handleDeleteUser}>
               Delete Account
             </Button>
             </Grid>
