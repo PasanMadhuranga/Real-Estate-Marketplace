@@ -27,8 +27,8 @@ export const updateUser = async (req, res,next) => {
         avatar: req.body.avatar,
       },
     }, {new: true});
-
-    const {hashedPassword, ...restOfUser} = updatedUser._doc;
+    //Using destructuring, extract the password field and rename it to hashedPassword (for clarity, though you don't use hashedPassword afterward).
+    const {password: hashedPassword, ...restOfUser} = updatedUser._doc;
     res.status(200).json(restOfUser);
 
   } catch(error){

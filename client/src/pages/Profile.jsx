@@ -12,6 +12,9 @@ import { useSelector } from "react-redux";
 import { useRef } from "react";
 import { useEffect } from "react";
 import  {app} from "../firebase";
+import { updateUserStart, updateUserSuccess, updateUserFailure } from "../redux/user/userSlice";
+import { useDispatch } from "react-redux";
+import axios from "axios";
 import {
   getDownloadURL,
   getStorage,
@@ -28,9 +31,11 @@ export default function Profile() {
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+  //initialize dispatch to use it to dispatch actions
+  const dispatch = useDispatch();
   // console.log(file)
-  // console.log(formData)
-  console.log(fileRef)
+  
+  // console.log(fileRef)
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -68,8 +73,57 @@ export default function Profile() {
       }
     );
   };
-        
   
+  //this function handles the form submission
+  // const handleSubmit = async (e) => {
+  //     e.preventDefault();
+  //     try {
+  //         dispatch(updateUserStart());
+  //         const response = await axios.put(`/api/user/update/${currentUser._id}`, formData,{
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
+  //     if(response.data.success === false){
+  //         dispatch(updateUserFailure(response.data.message));
+  //     }
+  //     dispatch(updateUserSuccess(response.data)); //if everything is ok dispatch the success action
+
+  //     } catch (error){
+  //         dispatch(updateUserFailure(error.message));
+  //     }
+  // }
+  const handleSubmit = async (event) => {
+    e.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const body = {
+      username: data.get("username"),
+      email: data.get("email"),
+      password: data.get("password"),
+    };
+    try {
+      dispatch(updateUserStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      const response = await res.json();
+      console.log(response);
+      if (response.success === false) {
+        dispatch(updateUserFailure(response.message));
+        return;
+      }
+
+      dispatch(updateUserSuccess(response));
+      
+    } catch (error) {
+      dispatch(updateUserFailure(error.message));
+    }
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -101,7 +155,7 @@ export default function Profile() {
               ''
             )}
          </p>
-        <Box component="form"  sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
         {/* onSubmit={handleSubmit} */}
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -113,6 +167,8 @@ export default function Profile() {
                 label="Username"
                 autoFocus
                 variant="outlined"
+                defaultValue={currentUser.username}
+                // onChange={handleChange} no need in mui
               />
             </Grid>
             <Grid item xs={12}>
@@ -124,11 +180,13 @@ export default function Profile() {
                 name="email"
                 // autoComplete="email"
                 variant="outlined"
+                defaultValue={currentUser.email}
+                
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                required
+                // required
                 fullWidth
                 name="password"
                 label="Password"
@@ -136,6 +194,7 @@ export default function Profile() {
                 id="password"
                 // autoComplete="new-password"
                 variant="outlined"
+                
               />
             </Grid>
           </Grid>
@@ -152,13 +211,13 @@ export default function Profile() {
           <Grid container display='flex' justifyContent="space-between">
 
             <Grid item xs={6} sx={{ textAlign: 'left' }}>
-            <Button variant="text" color="error" sx={{ textTransform: 'none' }} >
+            <Button variant="text" color="error" sx={{ textTransform: 'none', pl:1  }} >
               Delete Account
             </Button>
             </Grid>
 
             <Grid item xs={6} style={{ textAlign: 'right' }}>
-            <Button variant="text"color="error" sx={{ textTransform: 'none' }} >
+            <Button variant="text"color="error" sx={{ textTransform: 'none', pr:1 }} >
               Sign out
             </Button>
             </Grid>
