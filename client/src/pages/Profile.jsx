@@ -33,9 +33,6 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   //initialize dispatch to use it to dispatch actions
   const dispatch = useDispatch();
-  // console.log(file)
-  
-  // console.log(fileRef)
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -74,51 +71,30 @@ export default function Profile() {
     );
   };
   
-  //this function handles the form submission
-  // const handleSubmit = async (e) => {
-  //     e.preventDefault();
-  //     try {
-  //         dispatch(updateUserStart());
-  //         const response = await axios.put(`/api/user/update/${currentUser._id}`, formData,{
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
-  //     if(response.data.success === false){
-  //         dispatch(updateUserFailure(response.data.message));
-  //     }
-  //     dispatch(updateUserSuccess(response.data)); //if everything is ok dispatch the success action
-
-  //     } catch (error){
-  //         dispatch(updateUserFailure(error.message));
-  //     }
-  // }
+  
   const handleSubmit = async (event) => {
-    e.preventDefault();
+    event.preventDefault();
+    dispatch(updateUserStart());
     const data = new FormData(event.currentTarget);
     const body = {
       username: data.get("username"),
       email: data.get("email"),
       password: data.get("password"),
+      avatar: formData.avatar || currentUser.avatar,
     };
     try {
-      dispatch(updateUserStart());
-      const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method: 'POST',
+      const response = await axios.post(`/api/user/update/${currentUser._id}`, body, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(body),
       });
-      const response = await res.json();
-      console.log(response);
+
       if (response.success === false) {
         dispatch(updateUserFailure(response.message));
         return;
       }
-
-      dispatch(updateUserSuccess(response));
-      
+      dispatch(updateUserSuccess(response.data)); // The object that we pass here will be the payload of the action in the reducer
+      navigate("/profile")
     } catch (error) {
       dispatch(updateUserFailure(error.message));
     }
@@ -156,7 +132,6 @@ export default function Profile() {
             )}
          </p>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-        {/* onSubmit={handleSubmit} */}
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
