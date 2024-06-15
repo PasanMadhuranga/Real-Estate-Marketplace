@@ -15,6 +15,9 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import QuantityInput from "../components/QuantityInput";
+import { useState } from "react";
+import {app} from "../firebase";
+import {getStorage,ref, uploadBytesResumable,getDownloadURL} from "firebase/storage";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -28,7 +31,78 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
+
 export default function CreateListing() {
+  const [files, setFiles] = useState([]); //to choose the files
+  const [loading , setLoading] = useState(false)
+  // const [fileUploadError, setFileUploadError] = useState(false);
+  const [formData , setFormData] = useState({
+    imageUrls:[]
+  });
+  const [imageUploadError, setImageUploadError] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  console.log(files);
+  console.log("imageupload error:", imageUploadError)
+  console.log(formData.imageUrls)
+  
+  const handleImageSubmit =  (e) => {
+    console.log("insidehandlesubmit");
+    if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
+      setUploading(true);
+      setImageUploadError("");
+
+      const promises = [];
+      for (let i = 0; i < files.length; i++) {
+        promises.push(storeImage(files[i]));
+      }
+      Promise.all(promises).then((urls) =>{
+        setFormData({...formData, 
+          imageUrls: formData.imageUrls.concat(urls)
+        })
+        setImageUploadError("")
+        setUploading(false);
+
+      }).catch((error) => {
+        // console.log(error);
+        setImageUploadError("Image Upload failed(2 mb max per image)");
+        setUploading(false);
+      })
+    }else{
+      console.log("inside else")
+      setImageUploadError("You can only upload 6 images");
+      setUploading(false);
+    }
+  }
+
+  const storeImage = async (file) => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage(app);
+      const fileName = new Date().getTime() + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on("state_changed", 
+        (snapshot) => {
+          const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is ${progress}% done`)
+        },
+        (error) => {
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
+            resolve(downloadUrl);
+          }
+      )
+  });
+  });
+};
+//(_, i) is the callback function used by filter. The underscore _ represents the current element (which we don't need in this case), and i is the index of the current element.
+const handleDeleteImage = (index) => {
+  const newImageUrls = formData.imageUrls.filter((_, i) => i !== index);
+  setFormData({ ...formData, imageUrls: newImageUrls });
+} 
   return (
     // using main this makes SEO friendly
     <Container component="main" maxWidth="lg">
@@ -59,18 +133,26 @@ export default function CreateListing() {
               <Typography variant="subtitle2" color="text.secondary">
                 <strong>Images:</strong> The first image will be the cover (max 6)
               </Typography>
-              <Button
-                component="label"
-                role={undefined}
-                variant="contained"
-                tabIndex={-1}
-                startIcon={<CloudUploadIcon />}
-                color="success"
-                fullWidth
-              >
-                Upload images
-                <VisuallyHiddenInput type="file" />
-              </Button>
+             
+                <Box sx={{border:'1px solid grey', p:2}}>
+                <input
+                  onChange={(evt) => setFiles(evt.target.files)}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                />
+                </Box>
+                <Button onClick={handleImageSubmit} disabled={uploading} startIcon={<CloudUploadIcon />} sx={{textTransform:'none'}} type="button"> {uploading? 'Uploading...' : 'Upload Images'}</Button>
+                {imageUploadError && (
+                  <Typography variant="body2" color="error" sx={{ mt: 1 }}> {imageUploadError} </Typography>
+                )} 
+                 {formData.imageUrls.length > 0 && formData.imageUrls.map((url) => (
+                  <Box key={url} sx={{display: 'flex', mb: 1 }}>
+                    <img src={url} alt="listing image" width="100" height="100" />
+                    <Button sx={{ textTransform: 'none', marginLeft: 1 }} onClick={() => handleDeleteImage(index)}>Delete</Button>
+                  </Box>
+                ))}
+                  
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
@@ -152,14 +234,14 @@ export default function CreateListing() {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3 }}
+            sx={{ mt: 3, mb:3 }}
             size="large"
-            // disabled={loading}
+            disabled={loading}
           >
-            {/* {loading ? "Loading..." : "CREATE LISTING"} */}
-            CREATE LISTING
+            {loading ? "Loading..." : "CREATE LISTING"}
+            
           </Button>
-        </Box>
+          </Box>
         {/* {error && (
           <Alert sx={{ mt: 2 }} severity="error">
             {error}
@@ -167,5 +249,5 @@ export default function CreateListing() {
         )} */}
       </Box>
     </Container>
-  );
-}
+  )}
+

@@ -173,13 +173,13 @@ export default function Profile() {
         {/* //this p elemnt implements the showing of the progress of the file upload */}
         <p>
           {fileUploadError ? (
-            <span className="text-red-700">
+            <span >
               Error Image upload (image must be less than 2 mb)
             </span>
           ) : filePerc > 0 && filePerc < 100 ? (
             <span>{`Uploading ${filePerc}%`}</span>
           ) : filePerc === 100 ? (
-            <span className="text-green-700">Image successfully uploaded!</span>
+            <span >Image successfully uploaded!</span>
           ) : (
             ""
           )}

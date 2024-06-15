@@ -4,7 +4,7 @@ import { TextField, Box } from "@mui/material";
 function QuantityInput({ inputLabel, min, max }) {
   return (
     <Box
-      component="form"
+      // component="form"
       sx={{
         display: "flex",
         flexDirection: "column",
