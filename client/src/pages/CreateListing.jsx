@@ -56,6 +56,9 @@ export default function CreateListing() {
               />
             </Grid>
             <Grid item xs={12} md={6}>
+              <Typography variant="subtitle2" color="text.secondary">
+                <strong>Images:</strong> The first image will be the cover (max 6)
+              </Typography>
               <Button
                 component="label"
                 role={undefined}
@@ -122,15 +125,22 @@ export default function CreateListing() {
             </Grid>
             <Grid item xs={12}>
               <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid item xs={6} md={3}>
                   <QuantityInput inputLabel="Beds" min={1} max={10} />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6} md={3}>
                   <QuantityInput inputLabel="Bathrooms" min={1} max={10} />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6} md={3}>
                   <QuantityInput
                     inputLabel="Regular Price ($/ Month)"
+                    min={1}
+                    max={10000}
+                  />
+                </Grid>
+                <Grid item xs={6} md={3}>
+                  <QuantityInput
+                    inputLabel="Discount Price ($/ Month)"
                     min={1}
                     max={10000}
                   />
