@@ -1,7 +1,7 @@
 import React from "react";
 import { TextField, Box } from "@mui/material";
 
-function QuantityInput({ inputLabel, min, max }) {
+function QuantityInput({ inputLabel, min, max, fieldName }) {
   return (
     <Box
       // component="form"
@@ -18,6 +18,8 @@ function QuantityInput({ inputLabel, min, max }) {
         variant="outlined"
         fullWidth
         InputProps={{ inputProps: { min, max } }}
+        name={fieldName}
+        id={fieldName}
       />
     </Box>
   );

@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { styled } from "@mui/material/styles";
+// import { styled } from "@mui/material/styles";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
@@ -20,18 +20,24 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
+import { useSelector } from "react-redux";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Alert } from "@mui/material";
 
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
+// const VisuallyHiddenInput = styled("input")({
+//   clip: "rect(0 0 0 0)",
+//   clipPath: "inset(50%)",
+//   height: 1,
+//   overflow: "hidden",
+//   position: "absolute",
+//   bottom: 0,
+//   left: 0,
+//   whiteSpace: "nowrap",
+//   width: 1,
+// });
 
 export default function CreateListing() {
   const [files, setFiles] = useState([]); //to choose the files
@@ -42,6 +48,11 @@ export default function CreateListing() {
   });
   const [imageUploadError, setImageUploadError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const navigate = useNavigate();
+
+  const { currentUser } = useSelector((state) => state.user);
 
   console.log(files);
   console.log("imageupload error:", imageUploadError);
@@ -116,6 +127,56 @@ export default function CreateListing() {
         console.log("Error deleting image", error);
       });
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+    setLoading(true);
+    const data = new FormData(e.currentTarget);
+    const body = {
+      name: data.get("name"),
+      description: data.get("description"),
+      address: data.get("address"),
+      imageUrls: formData.imageUrls,
+      type: data.get("sell-rent-group"),
+      parking: data.get("ParkingSpot") === "on",
+      furnished: data.get("Furnished") === "on",
+      offer: data.get("Offer") === "on",
+      bedrooms: data.get("bedrooms"),
+      bathrooms: data.get("bathrooms"),
+      regularPrice: data.get("regularPrice"),
+      discountPrice: data.get("discountPrice"),
+      userRef: currentUser._id,
+    };
+    if (body.imageUrls.length === 0) {
+      setError("Please upload at least one image");
+      setLoading(false);
+      return;
+    }
+
+    if (body.regularPrice < body.discountPrice) {
+      setError("Discount price cannot be greater than regular price");
+      setLoading(false);
+      return;
+    }
+
+    const response = await axios.post("/api/listing/create", body, 
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });    
+    setLoading(false);
+    if (response.success === false) {
+      setError(response.message);
+    }
+    navigate("/profile");
+  } catch (error) {
+    setLoading(false);
+    setError(error.response.data.message);
+  }
+  };
+
   return (
     // using main this makes SEO friendly
     <Container component="main" maxWidth="lg">
@@ -130,7 +191,12 @@ export default function CreateListing() {
         <Typography component="h1" variant="h3">
           Create a Listing
         </Typography>
-        <Box component="form" sx={{ mt: 5 }}>
+        <Box component="form" sx={{ mt: 5 }} onSubmit={handleSubmit}>
+          {error && (
+            <Alert sx={{ mb: 2 }} severity="error">
+              {error}
+            </Alert>
+          )}
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <TextField
@@ -218,42 +284,85 @@ export default function CreateListing() {
               />
             </Grid>
             <Grid item xs={12} sx={{ mt: 2 }}>
-              <FormGroup row={true} sx={{ justifyContent: "space-between" }}>
-                <FormControlLabel
-                  control={<Checkbox color="success" />}
-                  label="Sell"
-                />
-                <FormControlLabel
-                  control={<Checkbox color="success" />}
-                  label="Rent"
-                />
-                <FormControlLabel
-                  control={<Checkbox color="success" />}
-                  label="Parking spot"
-                />
-                <FormControlLabel
-                  control={<Checkbox color="success" />}
-                  label="Furnished"
-                />
-                <FormControlLabel
-                  control={<Checkbox color="success" />}
-                  label="Offer"
-                />
-              </FormGroup>
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <RadioGroup
+                    row
+                    aria-labelledby="sell-rent"
+                    defaultValue="sell"
+                    name="sell-rent-group"
+                  >
+                    <FormControlLabel
+                      value="sell"
+                      control={<Radio />}
+                      label="Sell"
+                    />
+                    <FormControlLabel
+                      value="rent"
+                      control={<Radio />}
+                      label="Rent"
+                    />
+                  </RadioGroup>
+                </Grid>
+                <Grid item xs={8}>
+                  <FormGroup
+                    row={true}
+                    sx={{ justifyContent: "space-between" }}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          color="success"
+                          name="ParkingSpot"
+                          id="ParkingSpot"
+                        />
+                      }
+                      label="ParkingSpot"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          color="success"
+                          name="Furnished"
+                          id="Furnished"
+                        />
+                      }
+                      label="Furnished"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox color="success" name="Offer" id="Offer" />
+                      }
+                      label="Offer"
+                    />
+                  </FormGroup>
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput inputLabel="Beds" min={1} max={10} />
+                  <QuantityInput
+                    inputLabel="Beds"
+                    min={1}
+                    max={10}
+                    fieldName="bedrooms"
+                  />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput inputLabel="Bathrooms" min={1} max={10} />
+                  <QuantityInput
+                    inputLabel="Bathrooms"
+                    min={1}
+                    max={10}
+                    fieldName="bathrooms"
+                  />
                 </Grid>
                 <Grid item xs={6} md={3}>
                   <QuantityInput
                     inputLabel="Regular Price ($/ Month)"
                     min={1}
                     max={10000}
+                    fieldName="regularPrice"
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
@@ -261,6 +370,7 @@ export default function CreateListing() {
                     inputLabel="Discount Price ($/ Month)"
                     min={1}
                     max={10000}
+                    fieldName="discountPrice"
                   />
                 </Grid>
               </Grid>
