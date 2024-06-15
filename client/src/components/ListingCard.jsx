@@ -22,9 +22,10 @@ export default function ListingCard({ handleDeleteListing, imgUrl, name }) {
           display: "flex",
           bgcolor: "nature.dark",
           boxShadow: 4,
+          alignItems: "center",
         }}
       >
-        <Box sx={{ width: "200px", height: "100px"}}>
+        <Box sx={{ width: "150px", height: "100px"}}>
           <CardMedia
             component="img"
             sx={{ height: 100, objectFit: "cover" }}
@@ -32,13 +33,13 @@ export default function ListingCard({ handleDeleteListing, imgUrl, name }) {
             alt={name}
           />
         </Box>
-        <CardContent sx={{ display: "flex", alignItems: "center" }}>
+        <CardContent sx={{ display: "flex", alignItems: "center", flexGrow: 1  }}>
           <Typography sx={{ fontSize: 16 }} color="text.main">
-            {name}
+            {name.length > 25 ? name.slice(0, 25) + "..." : name}
           </Typography>
         </CardContent>
-        <Box sx={{ width: 1, display: "flex", justifyContent: "flex-end" }}>
-          <CardActions>
+        {/* <Box sx={{ display: "flex", justifyContent: "flex-end"}}> */}
+          <CardActions sx={{pr: 2}}>
             <Button variant="contained" size="small">
               edit
             </Button>
@@ -51,7 +52,7 @@ export default function ListingCard({ handleDeleteListing, imgUrl, name }) {
               Delete
             </Button>
           </CardActions>
-        </Box>
+        {/* </Box> */}
       </Card>
     </ThemeProvider>
   );
