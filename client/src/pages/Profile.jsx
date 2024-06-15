@@ -45,6 +45,7 @@ export default function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showListingsError, setShowListingsError] = useState(false);
   const [listings, setListings] = useState([]);
+  const [listingsLoaded, setListingsLoaded] = useState(false);
   //initialize dispatch to use it to dispatch actions
   const dispatch = useDispatch();
 
@@ -154,9 +155,20 @@ export default function Profile() {
         return;
       }
       setListings(response.data);
+      setListingsLoaded(true);
     } catch (error) {
       setShowListingsError(true);
     }
+  };
+
+  const deleteListing = async (id) => {
+    try {
+      const response = await axios.delete(`/api/listing/delete/${id}`);
+      if (response.success === false) {
+        return;
+      }
+      setListings(listings.filter((listing) => listing._id !== id));
+    } catch (error) {}
   };
 
   return (
@@ -315,7 +327,18 @@ export default function Profile() {
         )}
       </Container>
 
-      {listings.length > 0 && (
+      {listingsLoaded && (listings.length === 0 ? (
+        <Container maxWidth="sm">
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            sx={{ mb: 3 }}
+          >
+            <Alert severity="error">No Listings Available</Alert>
+          </Box>
+        </Container>
+      ) : (
         <Container maxWidth="sm">
           <Box
             display="flex"
@@ -330,10 +353,11 @@ export default function Profile() {
               key={listing._id}
               imgUrl={listing.imageUrls[0]}
               name={listing.name}
+              handleDelete={() => deleteListing(listing._id)}
             />
           ))}
         </Container>
-      )}
+      ))}
     </>
   );
 }

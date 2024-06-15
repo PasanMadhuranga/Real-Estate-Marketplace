@@ -10,10 +10,12 @@ import {
 } from "@mui/material";
 import theme from "../themes/theme";
 import { ThemeProvider } from "@mui/material/styles";
+import axios from "axios";
 
 
 
-export default function ProfileListing({ imgUrl, name }) {
+export default function ProfileListing({ handleDelete, imgUrl, name }) {
+
   return (
     <ThemeProvider theme={theme}>
       <Card
@@ -42,7 +44,7 @@ export default function ProfileListing({ imgUrl, name }) {
             <Button variant="contained" size="small">
               edit
             </Button>
-            <Button variant="contained" color="error" size="small">
+            <Button variant="contained" color="error" size="small" onClick={handleDelete}>
               Delete
             </Button>
           </CardActions>
