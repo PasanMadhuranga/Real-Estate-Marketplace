@@ -238,7 +238,8 @@ export default function Profile() {
             type="text"
             fullWidth
             variant="contained"
-            sx={{ mt: 1, mb: 2 , backgroundColor:'green' }}
+            sx={{ mt: 1, mb: 2}}
+            color="secondary"
             disabled={loading}
             href="/create-listing"
           >
