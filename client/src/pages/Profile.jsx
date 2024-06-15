@@ -31,6 +31,7 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
+import ListingCard from "../components/ListingCard";
 
 export default function Profile() {
   const fileRef = useRef(null);
@@ -42,6 +43,9 @@ export default function Profile() {
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [showListingsError, setShowListingsError] = useState(false);
+  const [listings, setListings] = useState([]);
+  const [listingsLoaded, setListingsLoaded] = useState(false);
   //initialize dispatch to use it to dispatch actions
   const dispatch = useDispatch();
 
@@ -142,20 +146,46 @@ export default function Profile() {
     }
   };
 
+  const handleShowListings = async () => {
+    try {
+      setShowListingsError(false);
+      const response = await axios.get(`/api/user/listings/${currentUser._id}`);
+      if (response.success === false) {
+        setShowListingsError(true);
+        return;
+      }
+      setListings(response.data);
+      setListingsLoaded(true);
+    } catch (error) {
+      setShowListingsError(true);
+    }
+  };
+
+  const deleteListing = async (id) => {
+    try {
+      const response = await axios.delete(`/api/listing/delete/${id}`);
+      if (response.success === false) {
+        return;
+      }
+      setListings(prevListings => prevListings.filter(listing => listing._id !== id));
+    } catch (error) {}
+  };
+
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 4,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography component="h1" variant="h4">
-          Profile
-        </Typography>
-        {/* fileRef.current gives direct access to the file input element because fileRef is a reference to that element.
+    <>
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography component="h1" variant="h4">
+            Profile
+          </Typography>
+          {/* fileRef.current gives direct access to the file input element because fileRef is a reference to that element.
         fileRef.current.click() programmatically triggers a click event on the hidden file input element. This opens the file dialog, allowing the user to select a file. */}
         <input
           onChange={(evt) => setFile(evt.target.files[0])}
@@ -234,54 +264,98 @@ export default function Profile() {
             {loading ? "Loading..." : "UPDATE"}
           </Button>
 
-          <Button
-            type="text"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 1, mb: 2}}
-            color="secondary"
-            disabled={loading}
-            href="/create-listing"
-          >
-            Create Listing
-          </Button>
-          
+            <Button
+              type="text"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 1, mb: 2 }}
+              color="secondary"
+              disabled={loading}
+              href="/create-listing"
+            >
+              Create Listing
+            </Button>
 
-          <Grid container display="flex" justifyContent="space-between">
-            <Grid item xs={6} sx={{ textAlign: "left" }}>
-              <Button
-                variant="text"
-                color="error"
-                sx={{ textTransform: "none", pl: 1 }}
-                onClick={handleDeleteUser}
-              >
-                Delete Account
-              </Button>
-            </Grid>
+            <Grid container display="flex" justifyContent="space-between">
+              <Grid item xs={6} sx={{ textAlign: "left" }}>
+                <Button
+                  variant="text"
+                  color="error"
+                  sx={{ textTransform: "none", pl: 1 }}
+                  onClick={handleDeleteUser}
+                >
+                  Delete Account
+                </Button>
+              </Grid>
 
-            <Grid item xs={6} style={{ textAlign: "right" }}>
-              <Button
-                variant="text"
-                color="error"
-                sx={{ textTransform: "none", pr: 1 }}
-                onClick={handleSignOut}
-              >
-                Sign out
-              </Button>
+              <Grid item xs={6} style={{ textAlign: "right" }}>
+                <Button
+                  variant="text"
+                  color="error"
+                  sx={{ textTransform: "none", pr: 1 }}
+                  onClick={handleSignOut}
+                >
+                  Sign out
+                </Button>
+              </Grid>
             </Grid>
-          </Grid>
+          </Box>
+          {error && (
+            <Alert sx={{ mt: 2 }} severity="error">
+              {error}
+            </Alert>
+          )}
+          {updateSuccess && (
+            <Alert sx={{ mt: 2 }} severity="success">
+              Profile updated successfully
+            </Alert>
+          )}
         </Box>
-        {error && (
-          <Alert sx={{ mt: 2 }} severity="error">
-            {error}
-          </Alert>
+        <Button
+          fullWidth
+          variant="text"
+          sx={{ mb: 2 }}
+          color="success"
+          onClick={handleShowListings}
+        >
+          Show Listings
+        </Button>
+        {showListingsError && (
+          <Alert severity="error">Error showing listings</Alert>
         )}
-        {updateSuccess && (
-          <Alert sx={{ mt: 2 }} severity="success">
-            Profile updated successfully
-          </Alert>
-        )}
-      </Box>
-    </Container>
+      </Container>
+
+      {listingsLoaded && (listings.length === 0 ? (
+        <Container maxWidth="sm">
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            sx={{ mb: 3 }}
+          >
+            <Alert severity="error">No Listings Available</Alert>
+          </Box>
+        </Container>
+      ) : (
+        <Container maxWidth="sm">
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            sx={{ mb: 3 }}
+          >
+            <Typography variant="h4">Your Listings</Typography>
+          </Box>
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing._id}
+              imgUrl={listing.imageUrls[0]}
+              name={listing.name}
+              handleDeleteListing={() => deleteListing(listing._id)}
+            />
+          ))}
+        </Container>
+      ))}
+    </>
   );
 }
