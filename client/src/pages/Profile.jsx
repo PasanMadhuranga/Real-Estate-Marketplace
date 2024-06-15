@@ -31,7 +31,7 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import ProfileListing from "../components/ProfileListing";
+import ListingCard from "../components/ListingCard";
 
 export default function Profile() {
   const fileRef = useRef(null);
@@ -167,7 +167,7 @@ export default function Profile() {
       if (response.success === false) {
         return;
       }
-      setListings(listings.filter((listing) => listing._id !== id));
+      setListings(prevListings => prevListings.filter(listing => listing._id !== id));
     } catch (error) {}
   };
 
@@ -349,11 +349,11 @@ export default function Profile() {
             <Typography variant="h4">Your Listings</Typography>
           </Box>
           {listings.map((listing) => (
-            <ProfileListing
+            <ListingCard
               key={listing._id}
               imgUrl={listing.imageUrls[0]}
               name={listing.name}
-              handleDelete={() => deleteListing(listing._id)}
+              handleDeleteListing={() => deleteListing(listing._id)}
             />
           ))}
         </Container>
