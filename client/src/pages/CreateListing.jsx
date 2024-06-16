@@ -265,7 +265,7 @@ export default function CreateListing() {
                 label="Description"
                 autoFocus
                 variant="filled"
-                inputProps={{ maxLength: 100, minLength: 3 }}
+                inputProps={{ minLength: 10 }}
                 multiline
                 rows={2}
               />
