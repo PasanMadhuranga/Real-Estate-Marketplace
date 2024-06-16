@@ -297,6 +297,8 @@ export default function EditListing() {
                     aria-labelledby="sell-rent"
                     defaultValue="sell"
                     name="sell-rent-group"
+                    // defaultValue={formData.type}
+                    // onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   >
                     <FormControlLabel
                       value="sell"

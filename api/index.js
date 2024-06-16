@@ -8,8 +8,9 @@ import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
-const dbUrl = process.env.MONGO_DB_URL;
-// const dbUrl = "mongodb://127.0.0.1:27017/mern-estate"
+// const dbUrl = process.env.MONGO_DB_URL;
+const dbUrl = "mongodb://127.0.0.1:27017/mern-estate"
+
 mongoose
   .connect(dbUrl)
   .then(() => {
