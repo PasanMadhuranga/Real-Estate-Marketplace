@@ -54,7 +54,7 @@ export default function Profile() {
       handleFileUpload(file);
     }
   }, [file]);
-
+  // console.log(listings)
   const handleFileUpload = (file) => {
     const storage = getStorage(app);
     const fileName = new Date().getTime() + file.name; //unique name for the file
@@ -154,6 +154,7 @@ export default function Profile() {
         return;
       }
       setListings(response.data);
+      // console.log(listings)
       setListingsLoaded(true);
     } catch (error) {
       setShowListingsError(true);
@@ -169,6 +170,8 @@ export default function Profile() {
       setListings(prevListings => prevListings.filter(listing => listing._id !== id));
     } catch (error) {}
   };
+
+  
 
   return (
     <>
@@ -348,11 +351,14 @@ export default function Profile() {
           {listings.map((listing) => (
             <ListingCard
               key={listing._id}
+              id={listing._id}
               imgUrl={listing.imageUrls[0]}
               name={listing.name}
               handleDeleteListing={() => deleteListing(listing._id)}
             />
-          ))}
+          ))
+          }
+          {/* {listings.map((lis) =>console.log(lis._id) )} */}
         </Container>
       ))}
     </>
