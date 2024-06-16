@@ -1,10 +1,9 @@
 import React from "react";
 import { TextField, Box } from "@mui/material";
 
-function QuantityInput({ inputLabel, min, max, fieldName }) {
+function QuantityInput({ inputLabel, min, max, fieldName, value, onChangeFunc }) {
   return (
     <Box
-      // component="form"
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -20,6 +19,8 @@ function QuantityInput({ inputLabel, min, max, fieldName }) {
         InputProps={{ inputProps: { min, max } }}
         name={fieldName}
         id={fieldName}
+        value={value}
+        onChange={onChangeFunc}
       />
     </Box>
   );

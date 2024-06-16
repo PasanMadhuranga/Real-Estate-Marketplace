@@ -1,4 +1,3 @@
-
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
@@ -11,7 +10,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import QuantityInput from "../components/QuantityInput";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { app } from "../firebase";
 import {
   getStorage,
@@ -24,7 +23,7 @@ import { useSelector } from "react-redux";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import axios from "axios";
-import { useNavigate , useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Alert } from "@mui/material";
 
 export default function EditListing() {
@@ -43,9 +42,7 @@ export default function EditListing() {
 
   const { currentUser } = useSelector((state) => state.user);
 
-
   const handleImageSubmit = (e) => {
-    
     if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
       setUploading(true);
       setImageUploadError("");
@@ -111,72 +108,75 @@ export default function EditListing() {
         console.log("Error deleting image", error);
       });
   };
+  
+  console.log("formdata", formData);
   //use this fetch data when edit a listing page is loaded
   useEffect(() => {
     const fetchListing = async () => {
-        const listingId = params.listingId;
-        try {
-            const response = await axios.get(`/api/listing/get/${listingId}`);
-            if (response.success === false) {
-                console.log(response.error)
-              return;
-            }
-            setFormData(response.data)
-            console.log("response.data",response.data)
-            console.log("formdata",formData)
-          } catch (error) {}
-    }
+      const listingId = params.listingId;
+      try {
+        const response = await axios.get(`/api/listing/get/${listingId}`);
+        if (response.success === false) {
+          console.log(response.error);
+          return;
+        }
+        console.log("response.data", response.data);
+        setFormData(response.data);
+      } catch (error) {}
+    };
     fetchListing();
-  },[])
-
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-    setLoading(true);
-    const data = new FormData(e.currentTarget);
-    const body = {
-      name: data.get("name"),
-      description: data.get("description"),
-      address: data.get("address"),
-      imageUrls: formData.imageUrls,
-      type: data.get("sell-rent-group"),
-      parking: data.get("ParkingSpot") === "on",
-      furnished: data.get("Furnished") === "on",
-      offer: data.get("Offer") === "on",
-      bedrooms: data.get("bedrooms"),
-      bathrooms: data.get("bathrooms"),
-      regularPrice: data.get("regularPrice"),
-      discountPrice: data.get("discountPrice"),
-      userRef: currentUser._id,
-    };
-    if (body.imageUrls.length === 0) {
-      setError("Please upload at least one image");
-      setLoading(false);
-      return;
-    }
+      setLoading(true);
+      const data = new FormData(e.currentTarget);
+      const body = {
+        name: data.get("name"),
+        description: data.get("description"),
+        address: data.get("address"),
+        imageUrls: formData.imageUrls,
+        type: data.get("sell-rent-group"),
+        parking: data.get("ParkingSpot") === "on",
+        furnished: data.get("Furnished") === "on",
+        offer: data.get("Offer") === "on",
+        bedrooms: data.get("bedrooms"),
+        bathrooms: data.get("bathrooms"),
+        regularPrice: data.get("regularPrice"),
+        discountPrice: data.get("discountPrice"),
+        userRef: currentUser._id,
+      };
+      if (body.imageUrls.length === 0) {
+        setError("Please upload at least one image");
+        setLoading(false);
+        return;
+      }
 
-    if (body.regularPrice < body.discountPrice) {
-      setError("Discount price cannot be greater than regular price");
-      setLoading(false);
-      return;
-    }
+      if (body.regularPrice < body.discountPrice) {
+        setError("Discount price cannot be greater than regular price");
+        setLoading(false);
+        return;
+      }
 
-    const response = await axios.post(`/api/listing/edit/${params.listingId}`, body, 
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });    
-    setLoading(false);
-    if (response.success === false) {
-      setError(response.message);
+      const response = await axios.post(
+        `/api/listing/edit/${params.listingId}`,
+        body,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setLoading(false);
+      if (response.success === false) {
+        setError(response.message);
+      }
+      navigate(`/listing/${response.data._id}`); //redirect to the listing page after creating the listing
+    } catch (error) {
+      setLoading(false);
+      setError(error.response.data.message);
     }
-    navigate(`/listing/${response.data._id}`); //redirect to the listing page after creating the listing
-  } catch (error) {
-    setLoading(false);
-    setError(error.response.data.message);
-  }
   };
 
   return (
@@ -207,8 +207,9 @@ export default function EditListing() {
                 fullWidth
                 id="name"
                 label="Name"
-                variant="filled"
+                // variant="filled"
                 defaultValue={formData.name}
+                multiline
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -267,7 +268,7 @@ export default function EditListing() {
                 id="description"
                 label="Description"
                 autoFocus
-                variant="filled"
+                // variant="filled"
                 inputProps={{ maxLength: 100, minLength: 3 }}
                 multiline
                 rows={2}
@@ -282,7 +283,7 @@ export default function EditListing() {
                 id="address"
                 label="Address"
                 autoFocus
-                variant="filled"
+                // variant="filled"
                 multiline
                 rows={2}
                 defaultValue={formData.address}
@@ -320,6 +321,9 @@ export default function EditListing() {
                           color="success"
                           name="ParkingSpot"
                           id="ParkingSpot"
+                          checked={formData.parking || false}
+                        onChange={(e) =>
+                          setFormData({ ...formData, parking: e.target.checked })}
                         />
                       }
                       label="ParkingSpot"
@@ -330,13 +334,20 @@ export default function EditListing() {
                           color="success"
                           name="Furnished"
                           id="Furnished"
+                          checked={formData.furnished || false}
+                        onChange={(e) =>
+                          setFormData({ ...formData, furnished: e.target.checked })}
                         />
                       }
                       label="Furnished"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox color="success" name="Offer" id="Offer" />
+                        <Checkbox color="success" name="Offer" id="Offer" 
+                        checked={formData.offer || false}
+                        onChange={(e) =>
+                          setFormData({ ...formData, offer: e.target.checked })}
+                        />
                       }
                       label="Offer"
                     />
@@ -352,6 +363,8 @@ export default function EditListing() {
                     min={1}
                     max={10}
                     fieldName="bedrooms"
+                    value={formData.bedrooms}
+                    onChangeFunc={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
@@ -360,6 +373,8 @@ export default function EditListing() {
                     min={1}
                     max={10}
                     fieldName="bathrooms"
+                    value={formData.bathrooms}
+                    onChangeFunc={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
@@ -368,6 +383,8 @@ export default function EditListing() {
                     min={1}
                     max={10000}
                     fieldName="regularPrice"
+                    value={formData.regularPrice}
+                    onChangeFunc={(e) => setFormData({ ...formData, regularPrice: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
@@ -376,6 +393,8 @@ export default function EditListing() {
                     min={1}
                     max={10000}
                     fieldName="discountPrice"
+                    value={formData.discountPrice}
+                    onChangeFunc={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
                   />
                 </Grid>
               </Grid>
