@@ -33,7 +33,7 @@ export const signin = async (req, res, next) => {
 
     const validPassword = await bcryptjs.compare(password, validUser.password);
     if (!validPassword)
-      return next(errorHandler(401, "Invalid username or password"));
+      return next(errorHandler(401, "Invalid email or password"));
 
     // If the credentials are valid, the server generates a JWT containing the user's ID and signs it with a secret key.
     // This is the secret key used to sign the JWT. It should be a long, random string stored securely in your environment variables.
