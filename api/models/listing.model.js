@@ -1,3 +1,4 @@
+import e from 'express';
 import mongoose from 'mongoose';
 
 const listingSchema = new mongoose.Schema({
@@ -39,6 +40,7 @@ const listingSchema = new mongoose.Schema({
     },
     type: {
         type: String,
+        enum: ["rent", "sell"],
         required: true,
     },
     offer: {
@@ -50,7 +52,8 @@ const listingSchema = new mongoose.Schema({
         required: true,
     },
     userRef: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
 }, { timestamps: true });
