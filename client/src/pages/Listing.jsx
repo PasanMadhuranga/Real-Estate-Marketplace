@@ -13,14 +13,17 @@ import BathtubIcon from "@mui/icons-material/Bathtub";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { useSelector } from "react-redux";
+import Contact from "../components/Contact";
 
 export default function Listing() {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [contact, setContact] = useState(false);
   const { listingId } = useParams();
-
+  const { currentUser } = useSelector((state) => state.user);
   useEffect(() => {
     const fetchListing = async () => {
       try {
@@ -89,9 +92,9 @@ export default function Listing() {
               {listing.name} - {listing.regularPrice} $
               {listing.type === "rent" && "/Month"}
             </Typography>
-            
+
             <Typography variant="body2" color="textSecondary">
-            <LocationOnIcon color="success"/>
+              <LocationOnIcon color="success" />
               {listing.address}
             </Typography>
             <Box
@@ -117,7 +120,7 @@ export default function Listing() {
               display="flex"
               justifyContent="space-between"
               alignItems="center"
-              mt={2}
+              sx={{mt: 2, mb: 3}}
             >
               <Box display="flex" alignItems="center">
                 <BedIcon color="secondary" />
@@ -158,14 +161,19 @@ export default function Listing() {
                 {/* <CheckIcon color="primary" /> */}
               </Box>
             </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{ mt: 3 }}
-            >
-              CONTACT LANDLORD
-            </Button>
+            {currentUser && currentUser._id !== listing.userRef && contact ? (
+              <Contact listing={listing} />
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mt: 3 }}
+                onClick={() => setContact(true)}
+              >
+                contact landlord
+              </Button>
+            )}
           </Box>
         </>
       )}
