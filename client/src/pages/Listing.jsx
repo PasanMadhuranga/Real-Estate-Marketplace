@@ -1,13 +1,19 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Alert, Box } from "@mui/material";
 import { Oval } from "react-loader-spinner";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
-import { Navigation } from 'swiper/modules';
+import { Navigation } from "swiper/modules";
 import "./Listing.css";
+import { Box, Typography, Button, Chip, Divider, Alert } from "@mui/material";
+import BedIcon from "@mui/icons-material/Bed";
+import BathtubIcon from "@mui/icons-material/Bathtub";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 export default function Listing() {
   const [listing, setListing] = useState(null);
@@ -62,17 +68,106 @@ export default function Listing() {
         </Alert>
       )}
       {listing && !loading && !error && (
-        <Swiper navigation={true} modules={[Navigation]}>
-        {listing.imageUrls.map((url, index) => (
-            <SwiperSlide key={index}>
-            <img
-              className="listing-image"
-              src={url}
-              alt={listing.name}
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+        <>
+          <Swiper navigation={true} modules={[Navigation]}>
+            {listing.imageUrls.map((url, index) => (
+              <SwiperSlide key={index}>
+                <img className="listing-image" src={url} alt={listing.name} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          <Box
+            sx={{
+              width: "100%",
+              maxWidth: "lg",
+              p: 3,
+              m: "auto",
+              mt: 5,
+            }}
+          >
+            <Typography variant="h5" component="h2" gutterBottom>
+              {listing.name} - {listing.regularPrice} $
+              {listing.type === "rent" && "/Month"}
+            </Typography>
+            
+            <Typography variant="body2" color="textSecondary">
+            <LocationOnIcon color="success"/>
+              {listing.address}
+            </Typography>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mt={2}
+            >
+              <Chip
+                label={`For ${listing.type === "sell" ? "Sale" : "Rent"}`}
+                color="error"
+              />
+              <Chip
+                label={`$${listing.discountPrice} discount`}
+                color="success"
+              />
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="body1" gutterBottom>
+              {listing.description}
+            </Typography>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mt={2}
+            >
+              <Box display="flex" alignItems="center">
+                <BedIcon color="secondary" />
+                <Typography variant="body2" ml={1}>
+                  {listing.bedrooms} Beds
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center">
+                <BathtubIcon color="secondary" />
+                <Typography variant="body2" ml={1}>
+                  {listing.bathrooms} Baths
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center">
+                <DirectionsCarIcon
+                  color={listing.parking ? "secondary" : "disabled"}
+                />
+                <Typography variant="body2" ml={1}>
+                  {listing.parking ? "Parking" : "No Parking"}
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center">
+                {listing.furnished ? (
+                  <>
+                    <CheckIcon color="success" />
+                    <Typography variant="body2" ml={1}>
+                      Furnished
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <CloseIcon color="error" />
+                    <Typography variant="body2" ml={1}>
+                      Not Furnished
+                    </Typography>
+                  </>
+                )}
+                {/* <CheckIcon color="primary" /> */}
+              </Box>
+            </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{ mt: 3 }}
+            >
+              CONTACT LANDLORD
+            </Button>
+          </Box>
+        </>
       )}
     </>
   );

@@ -269,7 +269,7 @@ export default function EditListing() {
                 label="Description"
                 autoFocus
                 // variant="filled"
-                inputProps={{ maxLength: 100, minLength: 3 }}
+                inputProps={{ minLength: 3 }}
                 multiline
                 rows={2}
                 defaultValue={formData.description}
