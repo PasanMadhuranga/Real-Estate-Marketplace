@@ -170,7 +170,7 @@ export default function CreateListing() {
     if (response.success === false) {
       setError(response.message);
     }
-    navigate("/profile");
+    navigate(`/listing/${response.data._id}`); //redirect to the listing page after creating the listing
   } catch (error) {
     setLoading(false);
     setError(error.response.data.message);
