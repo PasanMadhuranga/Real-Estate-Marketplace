@@ -12,7 +12,7 @@ export const signup = async (req, res, next) => {
   try {
     await newUser.save();
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-    const { password: hashedPassword, ...restOfUser } = newUser;
+    const { password: hashedPassword, ...restOfUser } = newUser._doc;
     res
       .cookie("access_token", token, { httpOnly: true })
       .status(200)

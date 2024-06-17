@@ -22,6 +22,7 @@ import { Oval } from "react-loader-spinner";
 import PropertyCard from "../components/PropertyCard";
 
 export default function Search() {
+  
   const [sidebarData, setSidebarData] = useState({
     searchTerm: "",
     type: "all",
@@ -33,8 +34,11 @@ export default function Search() {
   }); // this state will hold the data from the side panel
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
+  const [showMore, setShowMore] = useState(false);
   const navigate = useNavigate();
+  // console.log(listings);
 
+  //this useEffect will run when the component mounts and when the location.search changes
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchTerm = urlParams.get("searchTerm");
@@ -53,12 +57,16 @@ export default function Search() {
       sort: sort || "createdAt",
       order: order || "desc",
     });
-    
+
+    // this function will fetch the listings from the server
     const fetchListings = async () => {
       try {
         setLoading(true);
         const searchQuery = urlParams.toString();
         const response = await axios.get(`/api/listing/get?${searchQuery}`);
+        if (response.data.length > 6) {
+          setShowMore(true);
+        }
         setListings(response.data);
         setLoading(false);
       } catch (error) {
@@ -78,7 +86,27 @@ export default function Search() {
     const searchQuery = urlParams.toString();
     navigate(`/search/?${searchQuery}`);
   };
-
+  // this function will fetch more listings from the server when the user clicks on the show more button
+  const onShowMoreClick = async () => {
+    const numberOfListings = listings.length;
+    const startIndex = numberOfListings;
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set("startIndex", startIndex);
+    const searchQuery = urlParams.toString();
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/listing/get?${searchQuery}`);
+      setListings([...listings, ...response.data]);
+      
+      if (response.data.length < 6) {
+        setShowMore(false);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  }
   return (
     <ThemeProvider theme={theme}>
       <Container sx={{ mt: 3 }} maxWidth={false} component="form">
@@ -205,6 +233,7 @@ export default function Search() {
                 </Grid>
               ))}
             </Grid>
+            {showMore && (<Button onClick={onShowMoreClick} variant="contained" color="info">Show More</Button>)}
             {loading && (
               <Box
                 sx={{

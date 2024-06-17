@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardMedia, CardContent, Typography, Box } from '@mui/material';
+import { Card, CardMedia, CardContent, Typography, Box,Link } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 // import BedIcon from "@mui/icons-material/Bed";
 import HotelIcon from '@mui/icons-material/Hotel';
@@ -9,7 +9,9 @@ const PropertyCard = ({listing}) => {
 // Format the price using toLocaleString
   const formattedPrice = listing.regularPrice.toLocaleString();
   return (
-    <Card sx={{ maxWidth: 320, margin: 'auto', borderRadius: 1,height:496 }}>
+    <Link href={`/listing/${listing._id}`}  underline='none'> 
+    <Card 
+     sx={{ maxWidth: 320, margin: 'auto', borderRadius: 1,height:460 ,textDecoration: 'none'}}  >
         <Box sx={{ height: "200px"}}>
           <CardMedia
             component="img"
@@ -19,7 +21,13 @@ const PropertyCard = ({listing}) => {
           />
         </Box>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom
+          sx={{display: '-webkit-box',
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          WebkitLineClamp: 2,}}
+        >
           {listing.name}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 1 }}>
@@ -62,6 +70,7 @@ const PropertyCard = ({listing}) => {
         </Box>
       </CardContent>
     </Card>
+    </Link>
   );
 };
 
