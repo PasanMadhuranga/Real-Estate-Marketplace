@@ -161,7 +161,7 @@ export default function Listing() {
                 {/* <CheckIcon color="primary" /> */}
               </Box>
             </Box>
-            {currentUser && currentUser._id !== listing.userRef && contact ? (
+            {currentUser && currentUser._id !== listing.userRef && (contact ? (
               <Contact listing={listing} />
             ) : (
               <Button
@@ -173,7 +173,7 @@ export default function Listing() {
               >
                 contact landlord
               </Button>
-            )}
+            ))}
           </Box>
         </>
       )}
