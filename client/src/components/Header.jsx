@@ -12,8 +12,10 @@ export default function Header() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        //window.location.search contains the query string part of the current URL (everything after the ?).
         const urlParams = new URLSearchParams(window.location.search);
-        urlParams.set('searchTerm', searchTerm);
+        //This sets the searchTerm query parameter to the value of the searchTerm variable. If searchTerm already exists, it updates its value; if it doesn't exist, it adds it.
+        urlParams.set('searchTerm', searchTerm); //normally we use 'q' for query
         const searchQuery = urlParams.toString();
         navigate(`/search/?${searchQuery}`);
         // console.log(window)
@@ -23,10 +25,10 @@ export default function Header() {
     useEffect(() => {
         //This works because location is a global object in browsers that refers to the current URL.
         // The window object is also global and contains properties like location. When you reference location directly, it is implicitly understood to mean window.location.
-        const urlParams = new URLSearchParams(location.search);
-        const searchTermFromUrl = urlParams.get('searchTerm');
+        const urlParams = new URLSearchParams(location.search); //this contains everything after the '?'
+        const searchTermFromUrl = urlParams.get('searchTerm'); //this gets the value of the query parameter 'searchTerm' from urlParams
         if (searchTermFromUrl) {
-            setSearchTerm(searchTermFromUrl);
+            setSearchTerm(searchTermFromUrl); //this updates the searchterm in the search box
         }
     },[location.search])
 
