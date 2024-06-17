@@ -2,11 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Oval } from "react-loader-spinner";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/navigation";
-import { Navigation } from "swiper/modules";
-import "./Listing.css";
+import ImageSlider from "../components/ImageSlider";
 import { Box, Typography, Button, Chip, Divider, Alert } from "@mui/material";
 import BedIcon from "@mui/icons-material/Bed";
 import BathtubIcon from "@mui/icons-material/Bathtub";
@@ -72,13 +68,7 @@ export default function Listing() {
       )}
       {listing && !loading && !error && (
         <>
-          <Swiper navigation={true} modules={[Navigation]}>
-            {listing.imageUrls.map((url, index) => (
-              <SwiperSlide key={index}>
-                <img className="listing-image" src={url} alt={listing.name} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <ImageSlider imageUrls={listing.imageUrls} />
           <Box
             sx={{
               width: "100%",
