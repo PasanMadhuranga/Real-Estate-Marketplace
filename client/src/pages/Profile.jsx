@@ -49,6 +49,7 @@ export default function Profile() {
   const dispatch = useDispatch();
 
   //this useEffect is used to upload the file to the firebase storage
+  //everytime when there is change in the file state, the file will be uploaded by this effect
   useEffect(() => {
     if (file) {
       handleFileUpload(file);
@@ -350,7 +351,7 @@ export default function Profile() {
           </Box>
           {listings.map((listing) => (
             <ListingCard
-              key={listing._id}
+              key={listing._id} //this is the unique id of the listing. It is used to identify the listing, it doesnt not pass as a prop to the ListingCard component
               id={listing._id}
               imgUrl={listing.imageUrls[0]}
               name={listing.name}

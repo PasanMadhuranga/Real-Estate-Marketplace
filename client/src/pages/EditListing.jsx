@@ -109,8 +109,10 @@ export default function EditListing() {
       });
   };
   
-  console.log("formdata", formData);
+  // console.log("formdata", formData);
   //use this fetch data when edit a listing page is loaded
+  //this effect will run only once when the component is mounted. since [] is passed as the second argument to useEffect
+  //since it is not allowed to use async function as useEffect callback, we use an async function inside the useEffect callback
   useEffect(() => {
     const fetchListing = async () => {
       const listingId = params.listingId;
@@ -120,7 +122,7 @@ export default function EditListing() {
           console.log(response.error);
           return;
         }
-        console.log("response.data", response.data);
+        // console.log("response.data", response.data);
         setFormData(response.data);
       } catch (error) {}
     };
@@ -220,7 +222,7 @@ export default function EditListing() {
 
               <Box sx={{ border: "1px solid grey", p: 2 }}>
                 <input
-                  onChange={(evt) => setFiles(Array.from(evt.target.files))}
+                  onChange={(evt) => setFiles(evt.target.files)} //
                   type="file"
                   multiple
                   accept="image/*"
@@ -233,15 +235,15 @@ export default function EditListing() {
                 sx={{ textTransform: "none" }}
                 type="button"
               >
-                {" "}
+                
                 {uploading ? "Uploading..." : "Upload Images"}
               </Button>
               {imageUploadError && (
                 <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                  {" "}
-                  {imageUploadError}{" "}
+                  {imageUploadError}
                 </Typography>
               )}
+              {/* this displays the images that are uploaded */}
               {formData.imageUrls.length > 0 &&
                 formData.imageUrls.map((url, index) => (
                   <Box key={url} sx={{ display: "flex", mb: 1 }}>
@@ -298,7 +300,7 @@ export default function EditListing() {
                     defaultValue="sell"
                     name="sell-rent-group"
                     // defaultValue={formData.type}
-                    // onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    // onChange={(e) => setFormData({ ...formData, type: e.target.value })} //this is not needed since we are using the form data NEED TO FIX
                   >
                     <FormControlLabel
                       value="sell"
@@ -324,8 +326,8 @@ export default function EditListing() {
                           name="ParkingSpot"
                           id="ParkingSpot"
                           checked={formData.parking || false}
-                        onChange={(e) =>
-                          setFormData({ ...formData, parking: e.target.checked })}
+                          onChange={(e) =>
+                              setFormData({ ...formData, parking: e.target.checked })}
                         />
                       }
                       label="ParkingSpot"
@@ -337,7 +339,7 @@ export default function EditListing() {
                           name="Furnished"
                           id="Furnished"
                           checked={formData.furnished || false}
-                        onChange={(e) =>
+                          onChange={(e) =>
                           setFormData({ ...formData, furnished: e.target.checked })}
                         />
                       }
@@ -360,6 +362,7 @@ export default function EditListing() {
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 <Grid item xs={6} md={3}>
+                  {/* since this is our component we can pass the props to the component, to chnage the value of the input field, we pass onChangeFunc as a prop */}
                   <QuantityInput
                     inputLabel="Beds"
                     min={1}
@@ -413,11 +416,6 @@ export default function EditListing() {
             {loading ? "Loading..." : "UPDATE LISTING"}
           </Button>
         </Box>
-        {/* {error && (
-          <Alert sx={{ mt: 2 }} severity="error">
-            {error}
-          </Alert>
-        )} */}
       </Box>
     </Container>
   );

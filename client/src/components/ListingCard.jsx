@@ -11,10 +11,10 @@ import {
 } from "@mui/material";
 import theme from "../themes/theme";
 import { ThemeProvider } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 export default function ListingCard({ id,handleDeleteListing, imgUrl, name }) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // const handleEdit = () => {
   //   navigate(`/edit-listing/${id}`);

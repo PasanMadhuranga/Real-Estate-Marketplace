@@ -41,7 +41,7 @@ export const createListing = async (req, res, next) => {
       offer,
       imageUrls,
       userRef,
-    });
+    }); //otherwise we can pass req.body directly without destructuring as above
 
     // Save the listing to the database
     const listing = await newListing.save();
