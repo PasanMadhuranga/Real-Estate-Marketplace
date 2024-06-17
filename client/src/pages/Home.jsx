@@ -8,7 +8,7 @@ const listing = {
   "description": "A vibrant arts and crafts store featuring handmade goods from local artisans, art supplies, and creative workshops.",
   "address": "101 Pine Street, Artisanville, OR 97031",
   "regularPrice": 555777,
-  "discountPrice": 300,
+  "discountPrice": 3000,
   "bathrooms": 4,
   "bedrooms": 1,
   "furnished": true,

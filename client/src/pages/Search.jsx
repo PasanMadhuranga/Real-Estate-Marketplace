@@ -19,6 +19,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Oval } from "react-loader-spinner";
+import PropertyCard from "../components/PropertyCard";
 
 export default function Search() {
   const [sidebarData, setSidebarData] = useState({
@@ -196,6 +197,13 @@ export default function Search() {
               Listing results:
             </Typography>
             <Divider sx={{ mb: 2 }} />
+            <Grid container spacing={3}>
+              {listings.map((listing) => (
+                <Grid item xs={12} sm={6} md={4} key={listing._id}>
+                  <PropertyCard listing={listing} />
+                </Grid>
+              ))}
+            </Grid>
             {loading && (
               <Box
                 sx={{
