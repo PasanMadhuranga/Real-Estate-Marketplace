@@ -29,13 +29,13 @@ export default function Search() {
     furnished: false,
     sort: "createdAt",
     order: "desc",
-  });
+  }); // this state will hold the data from the side panel
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(location.search);
     const searchTerm = urlParams.get("searchTerm");
     const type = urlParams.get("type");
     const offer = urlParams.get("offer");
@@ -52,12 +52,12 @@ export default function Search() {
       sort: sort || "createdAt",
       order: order || "desc",
     });
+    
     const fetchListings = async () => {
       try {
         setLoading(true);
         const searchQuery = urlParams.toString();
         const response = await axios.get(`/api/listing/get?${searchQuery}`);
-        console.log(response.data);
         setListings(response.data);
         setLoading(false);
       } catch (error) {
@@ -72,7 +72,7 @@ export default function Search() {
     e.preventDefault();
     const urlParams = new URLSearchParams();
     for (const key in sidebarData) {
-      urlParams.set(key, sidebarData[key]);
+      urlParams.set(key, sidebarData[key]); // set the query params from sidebarData
     }
     const searchQuery = urlParams.toString();
     navigate(`/search/?${searchQuery}`);
@@ -89,7 +89,7 @@ export default function Search() {
             sx={{
               bgcolor: "nature.dark",
               p: 3,
-              height: { xs: "auto", md: "100vh" },
+              height: { md: "100vh" },
             }}
           >
             <TextField
@@ -97,6 +97,7 @@ export default function Search() {
               label="Search Term"
               variant="outlined"
               name="searchTerm"
+              color="success"
               onChange={(e) =>
                 setSidebarData({ ...sidebarData, searchTerm: e.target.value })
               }
@@ -113,14 +114,14 @@ export default function Search() {
               value={sidebarData.type}
             >
               <FormControlLabel
-                value="all"
+                value="all" // this value is the one that will be set in the state
                 control={<Radio color="success" />}
                 label="Rent & Sale"
               />
               <FormControlLabel
                 value="sell"
                 control={<Radio color="success" />}
-                label="Sell"
+                label="Sale"
               />
               <FormControlLabel
                 value="rent"
@@ -193,7 +194,7 @@ export default function Search() {
           </Grid>
           <Grid item xs={12} md={9}>
             <Typography variant="h4" gutterBottom>
-              Listing results:
+              Listing Results
             </Typography>
             <Divider sx={{ mb: 2 }} />
             {loading && (
