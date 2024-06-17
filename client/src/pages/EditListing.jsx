@@ -155,7 +155,7 @@ export default function EditListing() {
         return;
       }
 
-      if (body.regularPrice < body.discountPrice) {
+      if (Number(body.discountPrice) > Number(body.regularPrice)) {
         setError("Discount price cannot be greater than regular price");
         setLoading(false);
         return;

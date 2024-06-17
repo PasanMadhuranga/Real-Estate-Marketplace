@@ -13,6 +13,7 @@ const router = express.Router();
 router.post("/update/:id", verifyToken, updateUser);
 router.delete("/delete/:id", verifyToken, deleteUser);
 router.get("/listings/:id", verifyToken, getUserListings);
-router.get("/:id", verifyToken, getUser);
-
+router.get("/:id", verifyToken, getUser); 
+// in Profile component we get the user data from redux because we need the current user data. Also we can get the user data from this api
+// in Conact component we fetch the user details from this api
 export default router;

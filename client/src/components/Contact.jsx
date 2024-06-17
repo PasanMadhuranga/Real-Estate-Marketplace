@@ -10,7 +10,7 @@ export default function Contact({ listing }) {
   const [landlord, setLandlord] = useState(null);
   const [message, setMessage] = useState("");
 
-
+ // since we have only the id of the landlord we need to fetch the user (landlord) to display the username and email
   useEffect(() => {
     const fetchLandlord = async () => {
       try {
@@ -21,12 +21,10 @@ export default function Contact({ listing }) {
       }
     };
     fetchLandlord();
-  }, [listing.userRef]);
-  const handleChange = useCallback((e) => {
-    setMessage(e.target.value);
-  }, []);
+  }, [listing.userRef]); // we need to fetch the landlord whenever the listing changes
+
   return (
-    <div>
+    <>
       {landlord && (
         <>
           <Typography variant="body2" color="text.secondary" mb={1}>
@@ -54,6 +52,6 @@ export default function Contact({ listing }) {
           </Button>
         </>
       )}
-    </div>
+    </>
   );
 }
