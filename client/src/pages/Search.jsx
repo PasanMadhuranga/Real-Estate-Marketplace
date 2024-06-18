@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Oval } from "react-loader-spinner";
 import PropertyCard from "../components/PropertyCard";
+import { set } from "mongoose";
 
 export default function Search() {
   
@@ -22,23 +23,25 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
   const [showMore, setShowMore] = useState(false);
-  const [sidebarStyle, setSidebarStyle] = useState({}); // state to hold sidebar style
+  const [sidebarHeight, setSidebarHeight] = useState("100vh");
   const navigate = useNavigate();
-  // console.log(listings);
 
-   // Function to handle scroll
-   const handleScroll = () => {
-    if (window.scrollY > 0) {
-      setSidebarStyle({ bgcolor: "#E0F7FA", transition: "all 0.3s ease" });
-    } else {
-      setSidebarStyle({ bgcolor: "nature.dark", transition: "all 0.3s ease" });
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    // // Function to handle scroll
+    // const handleScroll = () => {
+    //     console.log("scrollY", window.scrollY)
+    //     console.log("screenY", window.screenY)
+    //     console.log("innerHeight", window.height)
+    //     console.log("documentHeight", document.documentElement.scrollHeight)
+    //     if (window.scrollY > 0) {
+    //       setSidebarHeight("100vh" + window.scrollY); // change to desired height when scrolled
+    //     } else {
+    //         setSidebarHeight("100vh");
+    //         }
+    //   };
+    
+      useEffect(() => {
+        setSidebarHeight(document.documentElement.scrollHeight + "px");
+      }, [listings]);
 
 
   //this useEffect will run when the component mounts and when the location.search changes
@@ -101,7 +104,7 @@ export default function Search() {
       const response = await axios.get(`/api/listing/get?${searchQuery}`);
       setListings([...listings, ...response.data.slice(0, 2)]);
       
-      if (response.data.length < 2) {
+      if (response.data.length <= 2) {
         setShowMore(false);
       }
       setLoading(false);
@@ -114,8 +117,7 @@ export default function Search() {
     <ThemeProvider theme={theme}>
       <Container sx={{ mt: 3 }} maxWidth={false} component="form">
         <Grid container spacing={3}>
-          <Grid item xs={12} md={3} sx={{...sidebarStyle,p: 3,height: { md: "100vh" },}}
-          >
+          <Grid item xs={12} md={3} sx={{p: 3, height: { md: sidebarHeight}, bgcolor: "nature.dark"}}>
             <TextField
               fullWidth
               label="Search Term"
@@ -221,7 +223,7 @@ export default function Search() {
               Listing Results
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{mb: 2}}>
               {listings.map((listing) => (
                 <Grid item xs={12} sm={6} md={4} xl={3} key={listing._id}>
                   <PropertyCard listing={listing} />
