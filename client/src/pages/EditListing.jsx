@@ -39,8 +39,8 @@ export default function EditListing() {
     offer: false,
     bedrooms: 1,
     bathrooms: 1,
-    regularPrice: undefined,
-    discountPrice: undefined,
+    regularPrice: 0,
+    discountPrice: 0,
     imageUrls: [],
   });
   const [imageUploadError, setImageUploadError] = useState("");
@@ -52,7 +52,6 @@ export default function EditListing() {
 
   const { currentUser } = useSelector((state) => state.user);
 
-  console.log(formData);
 
   const handleImageSubmit = (e) => {
     if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
