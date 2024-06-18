@@ -34,7 +34,7 @@ export default function Header() {
 
 
     return (
-        <AppBar position="static" color='default' elevation={1}  >
+        <AppBar color='default' elevation={1} sx={{position: "sticky", top: 0}} >
             <Toolbar>
                 <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
                     <Typography variant="h6" noWrap component={Link} to="/" sx={{ textDecoration: 'none', color: 'inherit' }}>

@@ -9,7 +9,6 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import QuantityInput from "../components/QuantityInput";
 import { useState, useEffect } from "react";
 import { app } from "../firebase";
 import {
@@ -31,6 +30,17 @@ export default function EditListing() {
   const [loading, setLoading] = useState(false);
   // const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    address: "",
+    type: "sell",
+    parking: false,
+    furnished: false,
+    offer: false,
+    bedrooms: 1,
+    bathrooms: 1,
+    regularPrice: undefined,
+    discountPrice: undefined,
     imageUrls: [],
   });
   const [imageUploadError, setImageUploadError] = useState("");
@@ -41,6 +51,8 @@ export default function EditListing() {
   const params = useParams(); //to get the listing id to load the edit-listing page with respective data
 
   const { currentUser } = useSelector((state) => state.user);
+
+  console.log(formData);
 
   const handleImageSubmit = (e) => {
     if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
@@ -108,7 +120,7 @@ export default function EditListing() {
         console.log("Error deleting image", error);
       });
   };
-  
+
   // console.log("formdata", formData);
   //use this fetch data when edit a listing page is loaded
   //this effect will run only once when the component is mounted. since [] is passed as the second argument to useEffect
@@ -133,21 +145,9 @@ export default function EditListing() {
     e.preventDefault();
     try {
       setLoading(true);
-      const data = new FormData(e.currentTarget);
       const body = {
-        name: data.get("name"),
-        description: data.get("description"),
-        address: data.get("address"),
-        imageUrls: formData.imageUrls,
-        type: data.get("sell-rent-group"),
-        parking: data.get("ParkingSpot") === "on",
-        furnished: data.get("Furnished") === "on",
-        offer: data.get("Offer") === "on",
-        bedrooms: data.get("bedrooms"),
-        bathrooms: data.get("bathrooms"),
-        regularPrice: data.get("regularPrice"),
-        discountPrice: data.get("discountPrice"),
-        userRef: currentUser._id,
+        ...formData,
+        userId: currentUser._id,
       };
       if (body.imageUrls.length === 0) {
         setError("Please upload at least one image");
@@ -209,8 +209,10 @@ export default function EditListing() {
                 fullWidth
                 id="name"
                 label="Name"
-                // variant="filled"
-                defaultValue={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                value={formData.name}
                 multiline
               />
             </Grid>
@@ -222,7 +224,7 @@ export default function EditListing() {
 
               <Box sx={{ border: "1px solid grey", p: 2 }}>
                 <input
-                  onChange={(evt) => setFiles(evt.target.files)} //
+                  onChange={(e) => setFiles(e.target.files)} //
                   type="file"
                   multiple
                   accept="image/*"
@@ -235,7 +237,6 @@ export default function EditListing() {
                 sx={{ textTransform: "none" }}
                 type="button"
               >
-                
                 {uploading ? "Uploading..." : "Upload Images"}
               </Button>
               {imageUploadError && (
@@ -274,7 +275,10 @@ export default function EditListing() {
                 inputProps={{ minLength: 3 }}
                 multiline
                 rows={2}
-                defaultValue={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                value={formData.description}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -288,7 +292,10 @@ export default function EditListing() {
                 // variant="filled"
                 multiline
                 rows={2}
-                defaultValue={formData.address}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+                value={formData.address}
               />
             </Grid>
             <Grid item xs={12} sx={{ mt: 2 }}>
@@ -296,20 +303,21 @@ export default function EditListing() {
                 <Grid item xs={4}>
                   <RadioGroup
                     row
-                    aria-labelledby="sell-rent"
-                    defaultValue="sell"
+                    aria-labelledby="sell-rent-group"
                     name="sell-rent-group"
-                    // defaultValue={formData.type}
-                    // onChange={(e) => setFormData({ ...formData, type: e.target.value })} //this is not needed since we are using the form data NEED TO FIX
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
                   >
                     <FormControlLabel
                       value="sell"
-                      control={<Radio />}
+                      control={<Radio color="success" />}
                       label="Sell"
                     />
                     <FormControlLabel
                       value="rent"
-                      control={<Radio />}
+                      control={<Radio color="success" />}
                       label="Rent"
                     />
                   </RadioGroup>
@@ -327,7 +335,11 @@ export default function EditListing() {
                           id="ParkingSpot"
                           checked={formData.parking || false}
                           onChange={(e) =>
-                              setFormData({ ...formData, parking: e.target.checked })}
+                            setFormData({
+                              ...formData,
+                              parking: e.target.checked,
+                            })
+                          }
                         />
                       }
                       label="ParkingSpot"
@@ -340,17 +352,28 @@ export default function EditListing() {
                           id="Furnished"
                           checked={formData.furnished || false}
                           onChange={(e) =>
-                          setFormData({ ...formData, furnished: e.target.checked })}
+                            setFormData({
+                              ...formData,
+                              furnished: e.target.checked,
+                            })
+                          }
                         />
                       }
                       label="Furnished"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox color="success" name="Offer" id="Offer" 
-                        checked={formData.offer || false}
-                        onChange={(e) =>
-                          setFormData({ ...formData, offer: e.target.checked })}
+                        <Checkbox
+                          color="success"
+                          name="Offer"
+                          id="Offer"
+                          checked={formData.offer || false}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              offer: e.target.checked,
+                            })
+                          }
                         />
                       }
                       label="Offer"
@@ -362,44 +385,78 @@ export default function EditListing() {
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 <Grid item xs={6} md={3}>
-                  {/* since this is our component we can pass the props to the component, to chnage the value of the input field, we pass onChangeFunc as a prop */}
-                  <QuantityInput
-                    inputLabel="Beds"
+                  <TextField
+                    type="number"
+                    label="Beds"
+                    variant="outlined"
+                    fullWidth
                     min={1}
-                    max={10}
-                    fieldName="bedrooms"
+                    max={20}
+                    name="bedrooms"
+                    id="bedrooms"
                     value={formData.bedrooms}
-                    onChangeFunc={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bedrooms: e.target.value })
+                    }
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput
-                    inputLabel="Bathrooms"
+                  <TextField
+                    type="number"
+                    label="Bathrooms"
+                    variant="outlined"
+                    fullWidth
                     min={1}
-                    max={10}
-                    fieldName="bathrooms"
+                    max={20}
+                    name="bathrooms"
+                    id="bathrooms"
                     value={formData.bathrooms}
-                    onChangeFunc={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bathrooms: e.target.value })
+                    }
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput
-                    inputLabel="Regular Price ($/ Month)"
+                  <TextField
+                    type="number"
+                    label={
+                      formData.type === "rent"
+                        ? "Regular Price ($/Month)"
+                        : "Regular Price ($)"
+                    }
+                    variant="outlined"
+                    fullWidth
                     min={1}
-                    max={10000}
-                    fieldName="regularPrice"
+                    max={1000000}
+                    name="regularPrice"
+                    id="regularPrice"
                     value={formData.regularPrice}
-                    onChangeFunc={(e) => setFormData({ ...formData, regularPrice: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, regularPrice: e.target.value })
+                    }
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput
-                    inputLabel="Discount Price ($/ Month)"
+                  <TextField
+                    type="number"
+                    label={
+                      formData.type === "rent"
+                        ? "Discount Price ($/Month)"
+                        : "Discount Price ($)"
+                    }
+                    variant="outlined"
+                    fullWidth
                     min={1}
-                    max={10000}
-                    fieldName="discountPrice"
+                    max={1000000}
+                    name="discountPrice"
+                    id="discountPrice"
                     value={formData.discountPrice}
-                    onChangeFunc={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        discountPrice: e.target.value,
+                      })
+                    }
                   />
                 </Grid>
               </Grid>

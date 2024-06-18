@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Oval } from "react-loader-spinner";
 import PropertyCard from "../components/PropertyCard";
-import { set } from "mongoose";
 
 export default function Search() {
   
@@ -23,26 +22,7 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
   const [showMore, setShowMore] = useState(false);
-  const [sidebarHeight, setSidebarHeight] = useState("100vh");
   const navigate = useNavigate();
-
-    // // Function to handle scroll
-    // const handleScroll = () => {
-    //     console.log("scrollY", window.scrollY)
-    //     console.log("screenY", window.screenY)
-    //     console.log("innerHeight", window.height)
-    //     console.log("documentHeight", document.documentElement.scrollHeight)
-    //     if (window.scrollY > 0) {
-    //       setSidebarHeight("100vh" + window.scrollY); // change to desired height when scrolled
-    //     } else {
-    //         setSidebarHeight("100vh");
-    //         }
-    //   };
-    
-      useEffect(() => {
-        setSidebarHeight(document.documentElement.scrollHeight + "px");
-      }, [listings]);
-
 
   //this useEffect will run when the component mounts and when the location.search changes
   useEffect(() => {
@@ -115,9 +95,12 @@ export default function Search() {
   }
   return (
     <ThemeProvider theme={theme}>
-      <Container sx={{ mt: 3 }} maxWidth={false} component="form">
+      <Container sx={{ mt: 3, width: "100%" }} maxWidth={false} component="form" >
         <Grid container spacing={3}>
-          <Grid item xs={12} md={3} sx={{p: 3, height: { md: sidebarHeight}, bgcolor: "nature.dark"}}>
+          <Grid item xs={12} md={3} sx={{p: 3, height: { md: "100vh"}, bgcolor: "nature.dark",
+          position: { md: "sticky"}, top: { md: 0 }
+        }}
+        >
             <TextField
               fullWidth
               label="Search Term"
