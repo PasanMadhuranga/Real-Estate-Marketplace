@@ -97,10 +97,12 @@ export default function Listing() {
                 label={`For ${listing.type === "sell" ? "Sale" : "Rent"}`}
                 color="error"
               />
+              {listing.offer && (
               <Chip
-                label={`$${listing.discountPrice} discount`}
+                label={`$${listing.regularPrice - listing.discountPrice} discount`}
                 color="success"
               />
+            )}
             </Box>
             <Divider sx={{ my: 2 }} />
             <Typography variant="body1" gutterBottom>
