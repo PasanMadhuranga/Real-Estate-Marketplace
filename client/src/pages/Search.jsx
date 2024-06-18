@@ -228,7 +228,7 @@ export default function Search() {
             <Divider sx={{ mb: 2 }} />
             <Grid container spacing={3}>
               {listings.map((listing) => (
-                <Grid item xs={12} sm={6} md={4} key={listing._id}>
+                <Grid item xs={12} sm={6} md={4} xl={3} key={listing._id}>
                   <PropertyCard listing={listing} />
                 </Grid>
               ))}

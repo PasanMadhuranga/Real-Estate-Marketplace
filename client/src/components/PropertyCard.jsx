@@ -26,7 +26,7 @@ const PropertyCard = ({listing}) => {
           WebkitBoxOrient: 'vertical',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          WebkitLineClamp: 2,}}
+          WebkitLineClamp: 1,}}
         >
           {listing.name}
         </Typography>
