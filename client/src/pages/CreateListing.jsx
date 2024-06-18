@@ -10,16 +10,9 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import QuantityInput from "../components/QuantityInput";
 import { useState } from "react";
 import { app } from "../firebase";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
+import {getStorage,ref,uploadBytesResumable, getDownloadURL, deleteObject,} from "firebase/storage";
 import { useSelector } from "react-redux";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -44,8 +37,20 @@ export default function CreateListing() {
   const [loading, setLoading] = useState(false);
   // const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    address: "",
+    type: "sell",
+    parking: false,
+    furnished: false,
+    offer: false,
+    bedrooms: 1,
+    bathrooms: 1,
+    regularPrice: undefined,
+    discountPrice: undefined,
     imageUrls: [],
   });
+  
   const [imageUploadError, setImageUploadError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
@@ -54,10 +59,7 @@ export default function CreateListing() {
 
   const { currentUser } = useSelector((state) => state.user);
 
-  console.log(files);
-  console.log("imageupload error:", imageUploadError);
-  console.log(formData.imageUrls);
-
+  console.log("formdata" ,formData)
   const handleImageSubmit = (e) => {
     console.log("insidehandlesubmit");
     if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
@@ -89,7 +91,12 @@ export default function CreateListing() {
     }
   };
 
+  //Great question! The resolve and reject functions are used inside the promise to indicate the completion (success or failure) of the asynchronous operation. 
+  //The .then and .catch methods are used to handle the outcome of the promise once it has been resolved or rejected.
   const storeImage = async (file) => {
+    //When you create a promise, you provide an executor function that performs the asynchronous operation. Within this function:
+    // resolve is called when the operation completes successfully.
+    // reject is called when the operation fails.
     return new Promise((resolve, reject) => {
       const storage = getStorage(app);
       const fileName = new Date().getTime() + file.name;
@@ -100,7 +107,7 @@ export default function CreateListing() {
         (snapshot) => {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
+          // console.log(`Upload is ${progress}% done`);
         },
         (error) => {
           reject(error);
@@ -127,27 +134,12 @@ export default function CreateListing() {
         console.log("Error deleting image", error);
       });
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
     setLoading(true);
-    const data = new FormData(e.currentTarget);
-    const body = {
-      name: data.get("name"),
-      description: data.get("description"),
-      address: data.get("address"),
-      imageUrls: formData.imageUrls,
-      type: data.get("sell-rent-group"),
-      parking: data.get("ParkingSpot") === "on",
-      furnished: data.get("Furnished") === "on",
-      offer: data.get("Offer") === "on",
-      bedrooms: data.get("bedrooms"),
-      bathrooms: data.get("bathrooms"),
-      regularPrice: data.get("regularPrice"),
-      discountPrice: data.get("discountPrice"),
-      userRef: currentUser._id,
-    };
+    const body = {...formData,userRef: currentUser._id};
     if (body.imageUrls.length === 0) {
       setError("Please upload at least one image");
       setLoading(false);
@@ -206,6 +198,10 @@ export default function CreateListing() {
                 id="name"
                 label="Name"
                 variant="filled"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -263,11 +259,14 @@ export default function CreateListing() {
                 fullWidth
                 id="description"
                 label="Description"
-                autoFocus
                 variant="filled"
                 inputProps={{ minLength: 10 }}
                 multiline
                 rows={2}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -281,6 +280,10 @@ export default function CreateListing() {
                 variant="filled"
                 multiline
                 rows={2}
+                value={formData.address}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12} sx={{ mt: 2 }}>
@@ -291,6 +294,10 @@ export default function CreateListing() {
                     aria-labelledby="sell-rent"
                     defaultValue="sell"
                     name="sell-rent-group"
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
                   >
                     <FormControlLabel
                       value="sell"
@@ -315,6 +322,8 @@ export default function CreateListing() {
                           color="success"
                           name="ParkingSpot"
                           id="ParkingSpot"
+                          checked={formData.parking}
+                          onChange={(e) => setFormData({...formData,parking: e.target.checked,})}
                         />
                       }
                       label="ParkingSpot"
@@ -325,13 +334,19 @@ export default function CreateListing() {
                           color="success"
                           name="Furnished"
                           id="Furnished"
+                          checked={formData.furnished}
+                          onChange={(e) => setFormData({...formData,furnished: e.target.checked,})}
                         />
                       }
                       label="Furnished"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox color="success" name="Offer" id="Offer" />
+                        <Checkbox 
+                        color="success" 
+                        name="Offer" id="Offer" 
+                        onChange={(e) => setFormData({...formData,offer: e.target.checked,})}
+                        />
                       }
                       label="Offer"
                     />
@@ -342,36 +357,52 @@ export default function CreateListing() {
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput
-                    inputLabel="Beds"
-                    min={1}
-                    max={10}
-                    fieldName="bedrooms"
+                  <TextField
+                    label="Bedrooms"
+                    type="number"
+                    variant="outlined"
+                    fullWidth
+                    name="bedrooms"
+                    id="bedrooms"
+                    value={formData.bedrooms}
+                    onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput
-                    inputLabel="Bathrooms"
-                    min={1}
-                    max={10}
-                    fieldName="bathrooms"
+                  <TextField
+                    label="Bathrooms"
+                    type="number"
+                    variant="outlined"
+                    fullWidth
+                    name="bathrooms"
+                    id="bathrooms"
+                    value={formData.bathrooms}
+                    onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput
-                    inputLabel="Regular Price ($/ Month)"
-                    min={1}
-                    max={10000}
-                    fieldName="regularPrice"
+                  <TextField
+                    label={formData.type === "rent" ? "Regular Price ($/Month)" : "Regular Price ($)"}
+                    type="number"
+                    variant="outlined"
+                    fullWidth
+                    name="regularPrice"
+                    id="regularPrice"
+                    value={formData.regularPrice}
+                    onChange={(e) => setFormData({ ...formData, regularPrice: e.target.value })}
                   />
                 </Grid>
                 <Grid item xs={6} md={3}>
-                  <QuantityInput
-                    inputLabel="Discount Price ($/ Month)"
-                    min={1}
-                    max={10000}
-                    fieldName="discountPrice"
-                  />
+                <TextField
+                  label={formData.type === "rent" ? "Discount Price ($/Month)" : "Discount Price ($)"}
+                  type="number"
+                  variant="outlined"
+                  fullWidth
+                  name="discountPrice"
+                  id="discountPrice"
+                  value={formData.discountPrice}
+                  onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
+                />
                 </Grid>
               </Grid>
             </Grid>

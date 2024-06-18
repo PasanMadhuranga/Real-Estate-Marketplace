@@ -103,7 +103,7 @@ export const deleteListing = async (req, res, next) => {
     }
 }    
 
-
+// Get a single listing
 export const getListing = async (req, res, next) => {
     try {
         const listing = await Listing.findById(req.params.id);
@@ -115,7 +115,7 @@ export const getListing = async (req, res, next) => {
         next(error);
     }
 }
-
+// Get all listings
 export const getListings = async (req, res, next) => {
     try {
         const limit = parseInt(req.query.limit) || 3;
@@ -158,6 +158,8 @@ export const getListings = async (req, res, next) => {
             type,
         }).sort({ [sort]: order }).limit(limit).skip(startIndex);
         // console.log(listings);
+        // .limit(limit): Limits the number of documents returned to the value of limit.
+        // .skip(startIndex): Skips the first startIndex documents. Useful for pagination
         return res.status(200).json(listings);
 
     } catch (error) {
