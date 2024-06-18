@@ -12,13 +12,24 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import { useState } from "react";
 import { app } from "../firebase";
-import {getStorage,ref,uploadBytesResumable, getDownloadURL, deleteObject,} from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import { useSelector } from "react-redux";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Input from "@mui/material/Input";
 import { Alert } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardMedia from "@mui/material/CardMedia";
+import CardActions from "@mui/material/CardActions";
+import { green } from "@mui/material/colors";
 
 // const VisuallyHiddenInput = styled("input")({
 //   clip: "rect(0 0 0 0)",
@@ -50,7 +61,7 @@ export default function CreateListing() {
     discountPrice: undefined,
     imageUrls: [],
   });
-  
+
   const [imageUploadError, setImageUploadError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
@@ -59,7 +70,7 @@ export default function CreateListing() {
 
   const { currentUser } = useSelector((state) => state.user);
 
-  console.log("formdata" ,formData)
+  console.log("formdata", formData);
   const handleImageSubmit = (e) => {
     console.log("insidehandlesubmit");
     if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
@@ -91,7 +102,7 @@ export default function CreateListing() {
     }
   };
 
-  //Great question! The resolve and reject functions are used inside the promise to indicate the completion (success or failure) of the asynchronous operation. 
+  //Great question! The resolve and reject functions are used inside the promise to indicate the completion (success or failure) of the asynchronous operation.
   //The .then and .catch methods are used to handle the outcome of the promise once it has been resolved or rejected.
   const storeImage = async (file) => {
     //When you create a promise, you provide an executor function that performs the asynchronous operation. Within this function:
@@ -134,279 +145,232 @@ export default function CreateListing() {
         console.log("Error deleting image", error);
       });
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-    setLoading(true);
-    const body = {...formData,userRef: currentUser._id};
-    if (body.imageUrls.length === 0) {
-      setError("Please upload at least one image");
-      setLoading(false);
-      return;
-    }
+      setLoading(true);
+      const body = { ...formData, userRef: currentUser._id };
+      if (body.imageUrls.length === 0) {
+        setError("Please upload at least one image");
+        setLoading(false);
+        return;
+      }
 
-    if (Number(body.discountPrice) > Number(body.regularPrice)) {
-      setError("Discount price cannot be greater than regular price");
-      setLoading(false);
-      return;
-    }
+      if (Number(body.discountPrice) > Number(body.regularPrice)) {
+        setError("Discount price cannot be greater than regular price");
+        setLoading(false);
+        return;
+      }
 
-    const response = await axios.post("/api/listing/create", body, 
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });    
-    setLoading(false);
-    if (response.success === false) {
-      setError(response.message);
+      const response = await axios.post("/api/listing/create", body, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setLoading(false);
+      if (response.success === false) {
+        setError(response.message);
+      }
+      navigate(`/listing/${response.data._id}`); //redirect to the listing page after creating the listing
+    } catch (error) {
+      setLoading(false);
+      setError(error.response.data.message);
     }
-    navigate(`/listing/${response.data._id}`); //redirect to the listing page after creating the listing
-  } catch (error) {
-    setLoading(false);
-    setError(error.response.data.message);
-  }
   };
 
   return (
-    // using main this makes SEO friendly
     <Container component="main" maxWidth="lg">
       <Box
         sx={{
-          marginTop: 8,
+          mt: 8,
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          justifyContent: "center",
+          mb: 2,
         }}
       >
         <Typography component="h1" variant="h3">
           Create a Listing
         </Typography>
-        <Box component="form" sx={{ mt: 5 }} onSubmit={handleSubmit}>
-          {error && (
-            <Alert sx={{ mb: 2 }} severity="error">
-              {error}
-            </Alert>
-          )}
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                name="name"
-                required
-                fullWidth
-                id="name"
-                label="Name"
-                variant="filled"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+      </Box>
+      <Grid component="form" onSubmit={handleSubmit} container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <TextField
+            name="name"
+            required
+            fullWidth
+            id="name"
+            label="Name"
+            variant="outlined"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            sx={{ my: 1 }}
+            color="success"
+          />
+          <TextField
+            name="description"
+            required
+            fullWidth
+            id="description"
+            label="Description"
+            variant="outlined"
+            inputProps={{ minLength: 10 }}
+            multiline
+            rows={3}
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            sx={{ my: 1 }}
+            color="success"
+          />
+          <TextField
+            name="address"
+            required
+            fullWidth
+            id="address"
+            label="Address"
+            autoFocus
+            variant="outlined"
+            multiline
+            rows={2}
+            value={formData.address}
+            onChange={(e) =>
+              setFormData({ ...formData, address: e.target.value })
+            }
+            sx={{ my: 1 }}
+            color="success"
+          />
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <RadioGroup
+              row
+              aria-labelledby="sell-rent"
+              defaultValue="sell"
+              name="sell-rent-group"
+              value={formData.type}
+              onChange={(e) =>
+                setFormData({ ...formData, type: e.target.value })
+              }
+            >
+              <FormControlLabel
+                value="sell"
+                control={<Radio color="success" />}
+                label="Sell"
               />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" color="text.secondary">
-                <strong>Images:</strong> The first image will be the cover (max
-                6)
-              </Typography>
+              <FormControlLabel
+                value="rent"
+                control={<Radio color="success" />}
+                label="Rent"
+              />
+            </RadioGroup>
 
-              <Box sx={{ border: "1px solid grey", p: 2 }}>
-                <input
-                  onChange={(evt) => setFiles(Array.from(evt.target.files))}
-                  type="file"
-                  multiple
-                  accept="image/*"
-                />
-              </Box>
-              <Button
-                onClick={handleImageSubmit}
-                disabled={uploading}
-                startIcon={<CloudUploadIcon />}
-                sx={{ textTransform: "none" }}
-                type="button"
-              >
-                {" "}
-                {uploading ? "Uploading..." : "Upload Images"}
-              </Button>
-              {imageUploadError && (
-                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                  {" "}
-                  {imageUploadError}{" "}
-                </Typography>
-              )}
-              {formData.imageUrls.length > 0 &&
-                formData.imageUrls.map((url, index) => (
-                  <Box key={url} sx={{ display: "flex", mb: 1 }}>
-                    <img
-                      src={url}
-                      alt="listing image"
-                      width="100"
-                      height="100"
-                    />
-                    <Button
-                      sx={{ textTransform: "none", marginLeft: 1 }}
-                      onClick={() => handleDeleteImage(index)}
-                    >
-                      Delete
-                    </Button>
-                  </Box>
-                ))}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                name="description"
-                required
-                fullWidth
-                id="description"
-                label="Description"
-                variant="filled"
-                inputProps={{ minLength: 10 }}
-                multiline
-                rows={2}
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                name="address"
-                required
-                fullWidth
-                id="address"
-                label="Address"
-                autoFocus
-                variant="filled"
-                multiline
-                rows={2}
-                value={formData.address}
-                onChange={(e) =>
-                  setFormData({ ...formData, address: e.target.value })
-                }
-              />
-            </Grid>
-            <Grid item xs={12} sx={{ mt: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  <RadioGroup
-                    row
-                    aria-labelledby="sell-rent"
-                    defaultValue="sell"
-                    name="sell-rent-group"
-                    value={formData.type}
+            <FormGroup row={true} sx={{ justifyContent: "space-between" }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color="success"
+                    name="ParkingSpot"
+                    id="ParkingSpot"
+                    checked={formData.parking}
                     onChange={(e) =>
-                      setFormData({ ...formData, type: e.target.value })
+                      setFormData({ ...formData, parking: e.target.checked })
                     }
-                  >
-                    <FormControlLabel
-                      value="sell"
-                      control={<Radio />}
-                      label="Sell"
-                    />
-                    <FormControlLabel
-                      value="rent"
-                      control={<Radio />}
-                      label="Rent"
-                    />
-                  </RadioGroup>
-                </Grid>
-                <Grid item xs={8}>
-                  <FormGroup
-                    row={true}
-                    sx={{ justifyContent: "space-between" }}
-                  >
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          color="success"
-                          name="ParkingSpot"
-                          id="ParkingSpot"
-                          checked={formData.parking}
-                          onChange={(e) => setFormData({...formData,parking: e.target.checked,})}
-                        />
-                      }
-                      label="ParkingSpot"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          color="success"
-                          name="Furnished"
-                          id="Furnished"
-                          checked={formData.furnished}
-                          onChange={(e) => setFormData({...formData,furnished: e.target.checked,})}
-                        />
-                      }
-                      label="Furnished"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox 
-                        color="success" 
-                        name="Offer" id="Offer" 
-                        onChange={(e) => setFormData({...formData,offer: e.target.checked,})}
-                        />
-                      }
-                      label="Offer"
-                    />
-                  </FormGroup>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <Grid container spacing={2}>
-                <Grid item xs={6} md={3}>
-                  <TextField
-                    label="Bedrooms"
-                    type="number"
-                    variant="outlined"
-                    fullWidth
-                    name="bedrooms"
-                    id="bedrooms"
-                    value={formData.bedrooms}
-                    onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
                   />
-                </Grid>
-                <Grid item xs={6} md={3}>
-                  <TextField
-                    label="Bathrooms"
-                    type="number"
-                    variant="outlined"
-                    fullWidth
-                    name="bathrooms"
-                    id="bathrooms"
-                    value={formData.bathrooms}
-                    onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+                }
+                label="ParkingSpot"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color="success"
+                    name="Furnished"
+                    id="Furnished"
+                    checked={formData.furnished}
+                    onChange={(e) =>
+                      setFormData({ ...formData, furnished: e.target.checked })
+                    }
                   />
-                </Grid>
-                <Grid item xs={6} md={3}>
-                  <TextField
-                    label={formData.type === "rent" ? "Regular Price ($/Month)" : "Regular Price ($)"}
-                    type="number"
-                    variant="outlined"
-                    fullWidth
-                    name="regularPrice"
-                    id="regularPrice"
-                    value={formData.regularPrice}
-                    onChange={(e) => setFormData({ ...formData, regularPrice: e.target.value })}
+                }
+                label="Furnished"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color="success"
+                    name="Offer"
+                    id="Offer"
+                    onChange={(e) =>
+                      setFormData({ ...formData, offer: e.target.checked })
+                    }
                   />
-                </Grid>
-                <Grid item xs={6} md={3}>
-                <TextField
-                  label={formData.type === "rent" ? "Discount Price ($/Month)" : "Discount Price ($)"}
-                  type="number"
-                  variant="outlined"
-                  fullWidth
-                  name="discountPrice"
-                  id="discountPrice"
-                  value={formData.discountPrice}
-                  onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
-                />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
+                }
+                label="Offer"
+              />
+            </FormGroup>
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+            <TextField
+              label="Bedrooms"
+              type="number"
+              variant="outlined"
+              name="bedrooms"
+              id="bedrooms"
+              sx={{ width: { xs: 200, sm: 300, md: 250 } }}
+              value={formData.bedrooms}
+              onChange={(e) =>
+                setFormData({ ...formData, bedrooms: e.target.value })
+              }
+            />
+            <TextField
+              label="Bathrooms"
+              type="number"
+              variant="outlined"
+              // fullWidth
+              sx={{ width: { xs: 200, sm: 300, md: 250 } }}
+              name="bathrooms"
+              id="bathrooms"
+              value={formData.bathrooms}
+              onChange={(e) =>
+                setFormData({ ...formData, bathrooms: e.target.value })
+              }
+            />
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+            <TextField
+              label={
+                formData.type === "rent"
+                  ? "Regular Price ($/Month)"
+                  : "Regular Price ($)"
+              }
+              type="number"
+              variant="outlined"
+              // fullWidth
+              sx={{ width: { xs: 200, sm: 300, md: 250 } }}
+              name="regularPrice"
+              id="regularPrice"
+              value={formData.regularPrice}
+              onChange={(e) =>
+                setFormData({ ...formData, regularPrice: e.target.value })
+              }
+            />
+
+            <TextField
+              label={
+                formData.type === "rent"
+                  ? "Discount Price ($/Month)"
+                  : "Discount Price ($)"
+              }
+              type="number"
+              variant="outlined"
+              sx={{ width: { xs: 200, sm: 300, md: 250 } }}
+              name="discountPrice"
+              id="discountPrice"
+              value={formData.discountPrice}
+              onChange={(e) =>
+                setFormData({ ...formData, discountPrice: e.target.value })
+              }
+            />
+          </Box>
           <Button
             type="submit"
             fullWidth
@@ -414,16 +378,127 @@ export default function CreateListing() {
             sx={{ mt: 3, mb: 3 }}
             size="large"
             disabled={loading}
+            color="success"
           >
             {loading ? "Loading..." : "CREATE LISTING"}
           </Button>
-        </Box>
-        {/* {error && (
-          <Alert sx={{ mt: 2 }} severity="error">
-            {error}
-          </Alert>
-        )} */}
-      </Box>
+          {error && (
+            <Alert sx={{ mb: 2 }} severity="error">
+              {error}
+            </Alert>
+          )}
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            <strong>Images:</strong> The first image will be the cover (max 6)
+          </Typography>
+          {/* <Box sx={{ border: "1px solid grey", p: 2 }}>
+            <input
+              onChange={(evt) => setFiles(Array.from(evt.target.files))}
+              type="file"
+              multiple
+              accept="image/*"
+            />
+          </Box> */}
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <input
+                style={{ display: "none" }}
+                id="file-upload"
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(evt) => setFiles(evt.target.files)}
+              />
+              <label htmlFor="file-upload">
+                <Button
+                  variant="contained"
+                  color="success"
+                  component="span"
+                  fullWidth
+                >
+                  {files.length > 0
+                    ? `${files.length} images selected`
+                    : "Choose Images"}
+                </Button>
+              </label>
+            </Grid>
+            <Grid item xs={4}>
+              <Button
+                onClick={handleImageSubmit}
+                disabled={uploading}
+                startIcon={<CloudUploadIcon />}
+                sx={{ textTransform: "none" }}
+                type="button"
+                variant="outlined"
+                fullWidth
+                color="success"
+              >
+                {uploading ? "Uploading..." : "Upload Images"}
+              </Button>
+            </Grid>
+          </Grid>
+
+          {imageUploadError && (
+            <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+              {imageUploadError}
+            </Typography>
+          )}
+          <Box sx={{ display: "flex", flexWrap: "wrap", mt: 3 }}>
+            {formData.imageUrls.length > 0 &&
+              formData.imageUrls.map((url, index) => (
+                <Card
+                  sx={{
+                    width: 250,
+                    margin: "auto",
+                    borderRadius: 1,
+                    height: 250,
+                    textDecoration: "none",
+                    mb: 2,
+                    bgcolor: "rgb(241, 245, 241)",
+                  }}
+                >
+                  <Box sx={{ height: "200px" }}>
+                    <CardMedia
+                      component="img"
+                      sx={{ height: 200, objectFit: "cover" }}
+                      image={url}
+                      alt="property image"
+                    />
+                  </Box>
+                  <CardActions >
+                    <Button
+                      sx={{ textTransform: "none"}}
+                      onClick={() => handleDeleteImage(index)}
+                      fullWidth
+                      variant="text"
+                      color="error"
+                    >
+                      Delete
+                    </Button>
+                  </CardActions>
+                </Card>
+                // <Box key={url} sx={{ mx: 1, mb: 2, width: "calc(50% - 16px)"}}>
+                //   <img
+                //     src={url}
+                //     alt="listing image"
+                //     width="100%"
+                //     height="250"
+                //   />
+                //   <Button
+                //     sx={{ textTransform: "none", mt: 1 }}
+                //     onClick={() => handleDeleteImage(index)}
+                //     fullWidth
+                //     variant="text"
+                //     color="error"
+                //   >
+                //     Delete
+                //   </Button>
+                // </Box>
+              ))}
+          </Box>
+        </Grid>
+      </Grid>
     </Container>
   );
 }

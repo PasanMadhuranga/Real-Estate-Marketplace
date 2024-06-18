@@ -98,7 +98,7 @@ export default function Search() {
       <Container sx={{ mt: 3, width: "100%" }} maxWidth={false} component="form" >
         <Grid container spacing={3}>
           <Grid item xs={12} md={3} sx={{p: 3, height: { md: "100vh"}, bgcolor: "nature.dark",
-          position: { md: "sticky"}, top: { md: 0 }
+          position: { md: "sticky"}
         }}
         >
             <TextField
