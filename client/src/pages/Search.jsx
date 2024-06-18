@@ -1,18 +1,5 @@
-import {
-  Container,
-  Grid,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  MenuItem,
-  Select,
-  Button,
-  Typography,
-  Box,
-  Divider,
-  RadioGroup,
-  Radio,
-} from "@mui/material";
+import {Container,Grid,TextField,FormControlLabel,Checkbox,MenuItem,Select,Button,
+    Typography,Box,Divider,RadioGroup,Radio,} from "@mui/material";
 import theme from "../themes/theme";
 import { ThemeProvider } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -35,8 +22,24 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
   const [showMore, setShowMore] = useState(false);
+  const [sidebarStyle, setSidebarStyle] = useState({}); // state to hold sidebar style
   const navigate = useNavigate();
   // console.log(listings);
+
+   // Function to handle scroll
+   const handleScroll = () => {
+    if (window.scrollY > 0) {
+      setSidebarStyle({ bgcolor: "#E0F7FA", transition: "all 0.3s ease" });
+    } else {
+      setSidebarStyle({ bgcolor: "nature.dark", transition: "all 0.3s ease" });
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
 
   //this useEffect will run when the component mounts and when the location.search changes
   useEffect(() => {
@@ -64,10 +67,10 @@ export default function Search() {
         setLoading(true);
         const searchQuery = urlParams.toString();
         const response = await axios.get(`/api/listing/get?${searchQuery}`);
-        if (response.data.length > 6) {
+        if (response.data.length > 2) { //sinnce db res with 7 listings, it means db has more listings
           setShowMore(true);
         }
-        setListings(response.data);
+        setListings(response.data.slice(0, 2));
         setLoading(false);
       } catch (error) {
         console.error(error);
@@ -96,9 +99,9 @@ export default function Search() {
     try {
       setLoading(true);
       const response = await axios.get(`/api/listing/get?${searchQuery}`);
-      setListings([...listings, ...response.data]);
+      setListings([...listings, ...response.data.slice(0, 2)]);
       
-      if (response.data.length < 6) {
+      if (response.data.length < 2) {
         setShowMore(false);
       }
       setLoading(false);
@@ -111,15 +114,7 @@ export default function Search() {
     <ThemeProvider theme={theme}>
       <Container sx={{ mt: 3 }} maxWidth={false} component="form">
         <Grid container spacing={3}>
-          <Grid
-            item
-            xs={12}
-            md={3}
-            sx={{
-              bgcolor: "nature.dark",
-              p: 3,
-              height: { md: "100vh" },
-            }}
+          <Grid item xs={12} md={3} sx={{...sidebarStyle,p: 3,height: { md: "100vh" },}}
           >
             <TextField
               fullWidth
@@ -233,7 +228,12 @@ export default function Search() {
                 </Grid>
               ))}
             </Grid>
-            {showMore && (<Button onClick={onShowMoreClick} variant="contained" color="info">Show More</Button>)}
+            {showMore && (
+              <Box sx={{display: "flex",justifyContent: "center", my:2}}>
+              <Button onClick={onShowMoreClick} variant="outlined" color="success">Show More</Button>
+              </Box>
+              )}
+              
             {loading && (
               <Box
                 sx={{
