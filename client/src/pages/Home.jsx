@@ -1,34 +1,145 @@
-import React from 'react'
-import PropertyCard from '../components/PropertyCard'
+import React from "react";
+import { Box, Typography, Button } from "@mui/material";
+import ImageSlider from "../components/ImageSlider";
+import theme from "../themes/theme";
+import { ThemeProvider } from "@mui/material";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Grid } from "@mui/material";
+import PropertyCard from "../components/PropertyCard";
+import { blueGrey } from "@mui/material/colors";
 
+const imageUrls = [
+  "https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1628133287836-40bd5453bed1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1560185008-b033106af5c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1489370321024-e0410ad08da4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1560448076-213180fe7d44?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  ];
 
-const listing = {
-  "_id": "666f37b525ee1e2e3b379784",
-  "name": "Artisan's Alley",
-  "description": "A vibrant arts and crafts store featuring handmade goods from local artisans, art supplies, and creative workshops.",
-  "address": "101 Pine Street, Artisanville, OR 97031",
-  "regularPrice": 555777,
-  "discountPrice": 3000,
-  "bathrooms": 4,
-  "bedrooms": 1,
-  "furnished": true,
-  "parking": true,
-  "type": "rent",
-  "offer": true,
-  "imageUrls": [
-    "https://firebasestorage.googleapis.com/v0/b/real-estate-marketplace-f7384.appspot.com/o/1718564602701pexels-pixabay-261101.jpg?alt=media&token=2a798954-a732-4c4d-9a65-72113ce52b6c",
-    "https://firebasestorage.googleapis.com/v0/b/real-estate-marketplace-f7384.appspot.com/o/1718564602704pexels-naimbic-2290738.jpg?alt=media&token=9e4dd27e-f8aa-486c-9d3d-d4149a9f2189",
-    "https://firebasestorage.googleapis.com/v0/b/real-estate-marketplace-f7384.appspot.com/o/1718564602705pexels-pixabay-261102.jpg?alt=media&token=6ce42180-f31e-43be-9b8a-dbe87d05f2b5"
-  ],
-  "userRef": "666f1e92b4c68870821352a6",
-  "createdAt": "2024-06-16T19:06:29.374Z",
-  "updatedAt": "2024-06-16T19:06:29.374Z",
-  "__v": 0
-}
 export default function Home() {
+  const [offerListings, setOfferListings] = useState([]);
+  const [saleListings, setSaleListings] = useState([]);
+  const [rentListings, setRentListings] = useState([]);
+  
+  const fetchOfferListings = async () => {
+    try {
+      const response = await axios.get("/api/listing/get?offer=true&limit=4");
+      setOfferListings(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchSaleListings = async () => {
+    try {
+      const response = await axios.get("/api/listing/get?type=sell&limit=4");
+      setSaleListings(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchRentListings = async () => {
+    try {
+      const response = await axios.get("/api/listing/get?type=rent&limit=4");
+      setRentListings(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOfferListings();
+    fetchSaleListings();
+    fetchRentListings();
+  }, []);
+
   return (
-    <div>
-      <PropertyCard listing={listing}/>
-    </div>
-  )
+    <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          height: "400px",
+          width: "100%",
+          // backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url(https://images.unsplash.com/photo-1486607303850-bc051a4ffad4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8ODJ8fHJlYWwlMjBlc3RhdGV8ZW58MHwwfDB8fHww)', // Add your background image path here
+          // backgroundSize: 'cover',
+          // backgroundPosition: 'center',
+          display: "flex",
+          flexDirection: "column",
+          // alignItems: 'center',
+          justifyContent: "center",
+          // color: 'white',
+          // textAlign: 'center',
+          bgcolor: "nature.dark",
+          p: 6,
+        }}
+      >
+        <Typography variant="h3" component="h1" >
+          Find your next perfect place with ease
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          component="p"
+          sx={{ marginTop: "16px" }}
+        >
+          We will help you find your home fast, easy and comfortable. Our expert
+          support are always available.
+        </Typography>
+        <Button
+          variant="contained"
+          color="success"
+          sx={{ mt: 3, width: "200px" }}
+          href="/search"
+        >
+          Let’s Start now
+        </Button>
+      </Box>
+      <ImageSlider imageUrls={imageUrls} />
+      <Box sx={{ my: 4, mx: 5 }}>
+        <Typography variant="h5" component="h4" gutterBottom color={blueGrey[600]}>
+          Recent Offers
+        </Typography>
+        <Button variant="text" color="success" href="/search?offer=true" sx={{mb: 1}}>
+          View All
+        </Button>
+        <Grid container spacing={3}>
+          {offerListings.map((listing) => (
+            <Grid item xs={12} sm={6} md={4} xl={3} key={listing._id}>
+              <PropertyCard listing={listing} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+      <Box sx={{ my: 4, mx: 5 }}>
+        <Typography variant="h5" component="h4" gutterBottom color={blueGrey[600]}>
+          Recent places for Sale
+        </Typography>
+        <Button variant="text" color="success" href="/search?type=sell" sx={{mb: 1}}>
+          View All
+        </Button>
+        <Grid container spacing={3}>
+          {saleListings.map((listing) => (
+            <Grid item xs={12} sm={6} md={4} xl={3} key={listing._id}>
+              <PropertyCard listing={listing} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+      <Box sx={{ my: 4, mx: 5 }}>
+        <Typography variant="h5" component="h4" gutterBottom color={blueGrey[600]}>
+          Recent places for Rent
+        </Typography>
+        <Button variant="text" color="success" href="/search?type=rent" sx={{mb: 1}}>
+          View All
+        </Button>
+        <Grid container spacing={3}>
+          {rentListings.map((listing) => (
+            <Grid item xs={12} sm={6} md={4} xl={3} key={listing._id}>
+              <PropertyCard listing={listing} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    </ThemeProvider>
+  );
 }
