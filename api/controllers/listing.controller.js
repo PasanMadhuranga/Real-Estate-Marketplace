@@ -89,7 +89,7 @@ export const deleteListing = async (req, res, next) => {
         if (!listing) {
             return next(errorHandler(404, "Listing not found"));
         }
-
+        console.log(req.user.id);
         if (!listing.userRef.equals(req.user.id)) {
             return next(errorHandler(401, "You can edit only your listings"));
         }

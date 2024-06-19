@@ -56,7 +56,7 @@ export const signin = async (req, res, next) => {
 
 export const google = async (req, res, next) => {
   try {
-    const { username, email, photo } = req.body;
+    const { username, email, avatar } = req.body;
     const user = await User.findOne({
       email,
     });
@@ -79,7 +79,7 @@ export const google = async (req, res, next) => {
           Math.floor(Math.random() * 1000),
         email,
         password: hashedPassword,
-        avatar: photo,
+        avatar,
       });
       await newUser.save();
 

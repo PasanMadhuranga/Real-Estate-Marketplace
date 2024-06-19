@@ -1,16 +1,18 @@
 import express from "express";
-import { verifyToken } from "../utils/verifyUser.js";
+import { verifyToken } from "../utils/middleware.js";
 import {
   updateUser,
   deleteUser,
   getUserListings,
   getUser
 } from "../controllers/user.controller.js";
+import { validateUpdateProfile } from "../utils/middleware.js";
+
 
 const router = express.Router();
 
 //first we verify the token and then we update the user
-router.post("/update/:id", verifyToken, updateUser);
+router.post("/update/:id", verifyToken, validateUpdateProfile, updateUser);
 router.delete("/delete/:id", verifyToken, deleteUser);
 router.get("/listings/:id", verifyToken, getUserListings);
 router.get("/:id", verifyToken, getUser); 
