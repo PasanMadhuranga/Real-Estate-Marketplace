@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-// import { styled } from "@mui/material/styles";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
@@ -27,25 +26,11 @@ import { useNavigate,useParams } from "react-router-dom";
 import Input from "@mui/material/Input";
 import { Alert } from "@mui/material";
 import { Card, CardMedia, IconButton , CardActions} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import { green } from "@mui/material/colors";
 
-// const VisuallyHiddenInput = styled("input")({
-//   clip: "rect(0 0 0 0)",
-//   clipPath: "inset(50%)",
-//   height: 1,
-//   overflow: "hidden",
-//   position: "absolute",
-//   bottom: 0,
-//   left: 0,
-//   whiteSpace: "nowrap",
-//   width: 1,
-// });
 
 export default function EditListing() {
   const [files, setFiles] = useState([]); //to choose the files
   const [loading, setLoading] = useState(false);
-  // const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -174,7 +159,6 @@ const handleSubmit = async (e) => {
       setLoading(true);
       const body = {
         ...formData,
-        userId: currentUser._id,
       };
       if (body.imageUrls.length === 0) {
         setError("Please upload at least one image");
@@ -409,7 +393,7 @@ const handleSubmit = async (e) => {
             disabled={loading}
             color="success"
           >
-            {loading ? "Loading..." : "CREATE LISTING"}
+            {loading ? "Loading..." : "EDIT LISTING"}
           </Button>
           {error && (
             <Alert sx={{ mb: 2 }} severity="error">
