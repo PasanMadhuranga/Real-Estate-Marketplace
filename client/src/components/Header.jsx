@@ -1,72 +1,205 @@
-import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Typography, Button, IconButton, InputBase, Box } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import { Link,useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import Avatar from '@mui/material/Avatar';
-import { green } from '@mui/material/colors';
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Menu from "@mui/material/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
+import Container from "@mui/material/Container";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import MenuItem from "@mui/material/MenuItem";
+import AdbIcon from "@mui/icons-material/Adb";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { alpha, styled } from "@mui/material/styles";
+import InputBase from "@mui/material/InputBase";
+import SearchIcon from "@mui/icons-material/Search";
+
+const StyledSearchButton = styled(Button)(({ theme }) => ({
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+}));
+
+const Search = styled("div")(({ theme }) => ({
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  width: "100%",
+  marginLeft: 0,
+  [theme.breakpoints.up("sm")]: {
+    width: "70%",
+  },
+  [theme.breakpoints.up("lg")]: {
+    width: "50%",
+  },
+}));
+
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  width: "100%",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+  },
+}));
 
 export default function Header() {
-    const { currentUser } = useSelector((state) => state.user);
-    const [searchTerm, setSearchTerm] = useState('');
-    const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.user);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        //window.location.search contains the query string part of the current URL (everything after the ?).
-        const urlParams = new URLSearchParams(window.location.search);
-        //This sets the searchTerm query parameter to the value of the searchTerm variable. If searchTerm already exists, it updates its value; if it doesn't exist, it adds it.
-        urlParams.set('searchTerm', searchTerm); //normally we use 'q' for query
-        const searchQuery = urlParams.toString();
-        navigate(`/search/?${searchQuery}`);
-        // console.log(window)
+  const handleOpenNavMenu = (event) => {
+    setAnchorElNav(event.currentTarget);
+  };
+
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    //window.location.search contains the query string part of the current URL (everything after the ?).
+    const urlParams = new URLSearchParams(window.location.search);
+    //This sets the searchTerm query parameter to the value of the searchTerm variable. If searchTerm already exists, it updates its value; if it doesn't exist, it adds it.
+    urlParams.set("searchTerm", searchTerm); //normally we use 'q' for query
+    const searchQuery = urlParams.toString();
+    navigate(`/search/?${searchQuery}`);
+    // console.log(window)
+  };
+
+  //everytime the url chnages, the search box will be updated with the search term
+  useEffect(() => {
+    //This works because location is a global object in browsers that refers to the current URL.
+    // The window object is also global and contains properties like location. When you reference location directly, it is implicitly understood to mean window.location.
+    const urlParams = new URLSearchParams(location.search); //this contains everything after the '?'
+    const searchTermFromUrl = urlParams.get("searchTerm"); //this gets the value of the query parameter 'searchTerm' from urlParams
+    if (searchTermFromUrl) {
+      setSearchTerm(searchTermFromUrl); //this updates the searchterm in the search box
     }
+  }, [location.search]);
 
-    //everytime the url chnages, the search box will be updated with the search term
-    useEffect(() => {
-        //This works because location is a global object in browsers that refers to the current URL.
-        // The window object is also global and contains properties like location. When you reference location directly, it is implicitly understood to mean window.location.
-        const urlParams = new URLSearchParams(location.search); //this contains everything after the '?'
-        const searchTermFromUrl = urlParams.get('searchTerm'); //this gets the value of the query parameter 'searchTerm' from urlParams
-        if (searchTermFromUrl) {
-            setSearchTerm(searchTermFromUrl); //this updates the searchterm in the search box
-        }
-    },[location.search])
+  return (
+    <AppBar position="static" color="success">
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{
+                display: { xs: "block", md: "none" },
+              }}
+            >
+              <MenuItem component="a" href="/">
+                <Typography textAlign="center">Home</Typography>
+              </MenuItem>
+              <MenuItem component="a" href="/about">
+                <Typography textAlign="center">About Us</Typography>
+              </MenuItem>
+            </Menu>
+          </Box>
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            href="/"
+            sx={{
+              mr: 2,
+              display: { xs: "none", md: "flex" },
+              fontFamily: "monospace",
+              fontWeight: 700,
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            RealEstate
+          </Typography>
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+            <Search>
+              <SearchIconWrapper>
+                <SearchIcon />
+              </SearchIconWrapper>
+              <StyledInputBase
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search…"
+                inputProps={{ "aria-label": "search" }}
+              />
+            </Search>
+            <StyledSearchButton onClick={handleSubmit} sx={{ ml: 1 }}>
+              <SearchIcon style={{ color: "white" }} />
+            </StyledSearchButton>
+          </Box>
+          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Button href="/" sx={{ my: 2, color: "white", display: "block" }}>
+              home
+            </Button>
+            <Button
+              href="/about"
+              sx={{ my: 2, color: "white", display: "block" }}
+            >
+              about us
+            </Button>
+          </Box>
 
-
-    return (
-        <AppBar color='default' elevation={1} sx={{position: "sticky", top: 0,bgcolor:green[600]}} >
-            <Toolbar>
-                <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="h6" noWrap component={Link} to="/" sx={{ textDecoration: 'none', color:'white' }}>
-                        <span>Real</span>
-                        <span>Estate</span>
-                    </Typography>
-                </Box>
-                <Box  component='form' onSubmit={handleSubmit} sx={{ p: '2px 4px', display: 'flex' , alignItems: 'center', width: 'auto', border:'1px  white', mr:5,bgcolor:green[300],opacity:"0.7"}}>
-                    <IconButton type="submit" sx={{ p: '10px', color:'white'}} aria-label="search">
-                        <SearchIcon />
-                    </IconButton>
-                    <InputBase
-                        sx={{ ml: 1, flex: 1,color:'white',opacity:"1.5"}}
-                        placeholder="Search..."
-                        inputProps={{ 'aria-label': 'search' }}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    
-                    
-                </Box>
-                <Button color="inherit" component={Link} to="/" sx={{color:'white',mx:1}}>Home</Button>
-                <Button color="inherit" component={Link} to="/about" sx={{color:'white'}}>About</Button>
-                {
-                    currentUser ? (
-                        <Avatar src={currentUser.avatar} alt="profile" sx={{ width: 40, height: 40 ,ml:2}} component={Link} to="/profile"/>
-                    ) : (
-                        <Button color="inherit" component={Link} to="/sign-in">SIGN IN</Button>
-                    )
-                }
-            </Toolbar>
-        </AppBar>
-    );
+          <Box sx={{ ml: 3 }}>
+            {currentUser ? (
+              <IconButton sx={{ p: 0 }} href="/profile">
+                <Avatar alt="profile" src={currentUser.avatar} />
+              </IconButton>
+            ) : (
+              <Button
+                href="/sign-in"
+                sx={{ my: 2, color: "white", display: "block" }}
+              >
+                sign in
+              </Button>
+            )}
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
+  );
 }

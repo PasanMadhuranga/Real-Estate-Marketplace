@@ -1,5 +1,19 @@
-import {Container,Grid,TextField,FormControlLabel,Checkbox,MenuItem,Select,Button,
-    Typography,Box,Divider,RadioGroup,Radio,} from "@mui/material";
+import {
+  Container,
+  Grid,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  MenuItem,
+  Select,
+  Button,
+  Typography,
+  Box,
+  Divider,
+  RadioGroup,
+  Radio,
+  Alert,
+} from "@mui/material";
 import theme from "../themes/theme";
 import { ThemeProvider } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -9,7 +23,6 @@ import { Oval } from "react-loader-spinner";
 import PropertyCard from "../components/PropertyCard";
 
 export default function Search() {
-  
   const [sidebarData, setSidebarData] = useState({
     searchTerm: "",
     type: "all",
@@ -50,7 +63,8 @@ export default function Search() {
         setLoading(true);
         const searchQuery = urlParams.toString();
         const response = await axios.get(`/api/listing/get?${searchQuery}`);
-        if (response.data.length > 2) { //sinnce db res with 7 listings, it means db has more listings
+        if (response.data.length > 2) {
+          //sinnce db res with 7 listings, it means db has more listings
           setShowMore(true);
         }
         setListings(response.data.slice(0, 2));
@@ -83,7 +97,7 @@ export default function Search() {
       setLoading(true);
       const response = await axios.get(`/api/listing/get?${searchQuery}`);
       setListings([...listings, ...response.data.slice(0, 2)]);
-      
+
       if (response.data.length <= 2) {
         setShowMore(false);
       }
@@ -92,156 +106,177 @@ export default function Search() {
       console.error(error);
       setLoading(false);
     }
-  }
+  };
   return (
     <ThemeProvider theme={theme}>
-      <Container sx={{ mt: 3, width: "100%" }} maxWidth={false} component="form" >
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={3} sx={{p: 3, height: { md: "100vh"}, bgcolor: "nature.dark",
-          position: { md: "sticky"}
-        }}
+      {/* <Container sx={{ mt: 3, width: "100%" }} maxWidth={false} > */}
+      <Grid container spacing={3} pt={3} pl={3}>
+        <Grid
+          item
+          xs={12}
+          md={3}
+          sx={{
+            p: 3,
+            height: { md: "100vh" },
+            bgcolor: "nature.dark",
+            position: { md: "sticky" },
+            top: { md: 0 },
+          }}
+          component="form"
         >
-            <TextField
-              fullWidth
-              label="Search Term"
-              variant="outlined"
-              name="searchTerm"
-              color="success"
-              onChange={(e) =>
-                setSidebarData({ ...sidebarData, searchTerm: e.target.value })
-              }
-              value={sidebarData.searchTerm}
+          <TextField
+            fullWidth
+            label="Search Term"
+            variant="outlined"
+            name="searchTerm"
+            color="success"
+            onChange={(e) =>
+              setSidebarData({ ...sidebarData, searchTerm: e.target.value })
+            }
+            value={sidebarData.searchTerm}
+          />
+          <RadioGroup
+            aria-labelledby="sell-rent-group"
+            name="sell-rent-group"
+            row
+            sx={{ mt: 1 }}
+            onChange={(e) =>
+              setSidebarData({ ...sidebarData, type: e.target.value })
+            }
+            value={sidebarData.type}
+          >
+            <FormControlLabel
+              value="all" // this value is the one that will be set in the state
+              control={<Radio color="success" />}
+              label="Rent & Sale"
             />
-            <RadioGroup
-              aria-labelledby="sell-rent-group"
-              name="sell-rent-group"
-              row
-              sx={{ mt: 1 }}
+            <FormControlLabel
+              value="sell"
+              control={<Radio color="success" />}
+              label="Sale"
+            />
+            <FormControlLabel
+              value="rent"
+              control={<Radio color="success" />}
+              label="Rent"
+            />
+          </RadioGroup>
+          <Box sx={{ mt: 1 }}>
+            <FormControlLabel
+              control={<Checkbox color="success" />}
+              label="Offer"
+              name="offer"
               onChange={(e) =>
-                setSidebarData({ ...sidebarData, type: e.target.value })
+                setSidebarData({ ...sidebarData, offer: e.target.checked })
               }
-              value={sidebarData.type}
-            >
-              <FormControlLabel
-                value="all" // this value is the one that will be set in the state
-                control={<Radio color="success" />}
-                label="Rent & Sale"
-              />
-              <FormControlLabel
-                value="sell"
-                control={<Radio color="success" />}
-                label="Sale"
-              />
-              <FormControlLabel
-                value="rent"
-                control={<Radio color="success" />}
-                label="Rent"
-              />
-            </RadioGroup>
-            <Box sx={{ mt: 1 }}>
-              <FormControlLabel
-                control={<Checkbox color="success" />}
-                label="Offer"
-                name="offer"
-                onChange={(e) =>
-                  setSidebarData({ ...sidebarData, offer: e.target.checked })
-                }
-                checked={sidebarData.offer}
-              />
-              <FormControlLabel
-                control={<Checkbox color="success" />}
-                label="Parking"
-                name="parking"
-                onChange={(e) =>
-                  setSidebarData({ ...sidebarData, parking: e.target.checked })
-                }
-                checked={sidebarData.parking}
-              />
-              <FormControlLabel
-                control={<Checkbox color="success" />}
-                label="Furnished"
-                name="furnished"
-                onChange={(e) =>
-                  setSidebarData({
-                    ...sidebarData,
-                    furnished: e.target.checked,
-                  })
-                }
-                checked={sidebarData.furnished}
-              />
-            </Box>
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Sort by:
-              </Typography>
-              <Select
-                fullWidth
-                variant="outlined"
-                color="success"
-                name="sort-order"
-                onChange={(e) => {
-                  const [sort, order] = e.target.value.split("_");
-                  setSidebarData({ ...sidebarData, sort, order });
-                }}
-                value={`${sidebarData.sort}_${sidebarData.order}`}
-              >
-                <MenuItem value="regularPrice_desc">Price high to low</MenuItem>
-                <MenuItem value="regularPrice_asc">Price low to high</MenuItem>
-                <MenuItem value="createdAt_desc">Newest</MenuItem>
-                <MenuItem value="createdAt_asc">Oldest</MenuItem>
-              </Select>
-            </Box>
-            <Button
-              variant="contained"
-              color="success"
-              sx={{ my: 3 }}
-              fullWidth
-              onClick={handleSubmit}
-            >
-              Search
-            </Button>
-          </Grid>
-          <Grid item xs={12} md={9}>
-            <Typography variant="h4" gutterBottom>
-              Listing Results
+              checked={sidebarData.offer}
+            />
+            <FormControlLabel
+              control={<Checkbox color="success" />}
+              label="Parking"
+              name="parking"
+              onChange={(e) =>
+                setSidebarData({ ...sidebarData, parking: e.target.checked })
+              }
+              checked={sidebarData.parking}
+            />
+            <FormControlLabel
+              control={<Checkbox color="success" />}
+              label="Furnished"
+              name="furnished"
+              onChange={(e) =>
+                setSidebarData({
+                  ...sidebarData,
+                  furnished: e.target.checked,
+                })
+              }
+              checked={sidebarData.furnished}
+            />
+          </Box>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Sort by:
             </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={3} sx={{mb: 2}}>
-              {listings.map((listing) => (
+            <Select
+              fullWidth
+              variant="outlined"
+              color="success"
+              name="sort-order"
+              onChange={(e) => {
+                const [sort, order] = e.target.value.split("_");
+                setSidebarData({ ...sidebarData, sort, order });
+              }}
+              value={`${sidebarData.sort}_${sidebarData.order}`}
+            >
+              <MenuItem value="regularPrice_desc">Price high to low</MenuItem>
+              <MenuItem value="regularPrice_asc">Price low to high</MenuItem>
+              <MenuItem value="createdAt_desc">Newest</MenuItem>
+              <MenuItem value="createdAt_asc">Oldest</MenuItem>
+            </Select>
+          </Box>
+          <Button
+            variant="contained"
+            color="success"
+            sx={{ my: 3 }}
+            fullWidth
+            onClick={handleSubmit}
+          >
+            Search
+          </Button>
+        </Grid>
+        <Grid item xs={12} md={9} pr={3}>
+          <Typography variant="h4" gutterBottom>
+            Listing Results
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={3} sx={{ mb: 2 }}>
+            {listings.length > 0 ? (
+              listings.map((listing) => (
                 <Grid item xs={12} sm={6} md={4} xl={3} key={listing._id}>
                   <PropertyCard listing={listing} />
                 </Grid>
-              ))}
-            </Grid>
-            {showMore && (
-              <Box sx={{display: "flex",justifyContent: "center", my:2}}>
-              <Button onClick={onShowMoreClick} variant="outlined" color="success">Show More</Button>
-              </Box>
-              )}
-              
-            {loading && (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100vh",
-                }}
-              >
-                <Oval
-                  visible={true}
-                  height="80"
-                  width="80"
-                  color="#4fa94d"
-                  ariaLabel="oval-loading"
-                  wrapperStyle={{}}
-                  wrapperClass=""
-                />
-              </Box>
+              ))
+            ) : (
+                <Alert severity="error" sx={{ mt: 3, width: "100%", ml: 3 }}>
+                  No listing available
+                </Alert>
             )}
           </Grid>
+          {showMore && (
+            <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+              <Button
+                onClick={onShowMoreClick}
+                variant="outlined"
+                color="success"
+              >
+                Show More
+              </Button>
+            </Box>
+          )}
+
+          {loading && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+              }}
+            >
+              <Oval
+                visible={true}
+                height="80"
+                width="80"
+                color="#4fa94d"
+                ariaLabel="oval-loading"
+                wrapperStyle={{}}
+                wrapperClass=""
+              />
+            </Box>
+          )}
         </Grid>
-      </Container>
+      </Grid>
+      {/* </Container> */}
     </ThemeProvider>
   );
 }
