@@ -478,23 +478,7 @@ export default function CreateListing() {
                     </Button>
                   </CardActions>
                 </Card>
-                // <Box key={url} sx={{ mx: 1, mb: 2, width: "calc(50% - 16px)"}}>
-                //   <img
-                //     src={url}
-                //     alt="listing image"
-                //     width="100%"
-                //     height="250"
-                //   />
-                //   <Button
-                //     sx={{ textTransform: "none", mt: 1 }}
-                //     onClick={() => handleDeleteImage(index)}
-                //     fullWidth
-                //     variant="text"
-                //     color="error"
-                //   >
-                //     Delete
-                //   </Button>
-                // </Box>
+                
               ))}
           </Box>
         </Grid>
