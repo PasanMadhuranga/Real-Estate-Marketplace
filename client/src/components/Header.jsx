@@ -19,6 +19,7 @@ import { alpha, styled } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 
+// This button is a styled version of the Button component from Material-UI
 const StyledSearchButton = styled(Button)(({ theme }) => ({
   backgroundColor: alpha(theme.palette.common.white, 0.15),
   "&:hover": {
@@ -35,8 +36,7 @@ const Search = styled("div")(({ theme }) => ({
   },
   width: "100%",
   marginLeft: 0,
-  [theme.breakpoints.up("sm")]: {
-    width: "70%",
+  [theme.breakpoints.up("sm")]: { // the properties in this block will be applied when the screen width is greater than or equal to 'sm' breakpoint
   },
   [theme.breakpoints.up("lg")]: {
     width: "50%",
@@ -103,10 +103,10 @@ export default function Header() {
     <AppBar position="static" color="success">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+          <Box sx={{ display: { xs: "flex", md: "none" } }}> {/* this box will be displayed only on xs and md screens */}
             <IconButton
               size="large"
-              aria-label="account of current user"
+              aria-label="menu-item"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
