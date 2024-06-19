@@ -20,6 +20,7 @@ import {
 export default function SignUp() {
   // const [error, setError] = useState(null);
   // const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({username: "", email: "", password: ""});
   const { error, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
@@ -31,11 +32,7 @@ export default function SignUp() {
     // FormData is a built-in JavaScript object that easily captures the data from the form fields.
     // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
     const data = new FormData(event.currentTarget);
-    const body = {
-      username: data.get("username"),
-      email: data.get("email"),
-      password: data.get("password"),
-    };
+    const body = {...formData};
 
     try {
       const response = await axios.post("/api/auth/signup", body, {
@@ -79,6 +76,8 @@ export default function SignUp() {
                 label="Username"
                 autoFocus
                 variant="outlined"
+                value={formData.username}
+                onChange={(e) => setFormData({...formData, username: e.target.value})}
               />
             </Grid>
             <Grid item xs={12}>
@@ -89,7 +88,9 @@ export default function SignUp() {
                 label="Email Address"
                 name="email"
                 // autoComplete="email"
+                value={formData.email}
                 variant="outlined"
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
               />
             </Grid>
             <Grid item xs={12}>
@@ -102,6 +103,8 @@ export default function SignUp() {
                 id="password"
                 // autoComplete="new-password"
                 variant="outlined"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
               />
             </Grid>
           </Grid>

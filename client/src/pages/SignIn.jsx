@@ -11,10 +11,11 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice";
 import OAuth from "../components/OAuth";
+import { useState } from "react";
 
 
 export default function SignIn() {
-
+  const [formData, setFormData] = useState({email: "", password: ""});
   const {loading, error} = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -25,10 +26,7 @@ export default function SignIn() {
     // FormData is a built-in JavaScript object that easily captures the data from the form fields.
     // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
     const data = new FormData(event.currentTarget);
-    const body = {
-      email: data.get("email"),
-      password: data.get("password"),
-    };
+    const body = {...formData};
 
     try {
       const response = await axios.post("/api/auth/signin", body, {
@@ -72,6 +70,8 @@ export default function SignIn() {
                 name="email"
                 // autoComplete="email"
                 variant="outlined"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
               />
             </Grid>
             <Grid item xs={12}>
@@ -84,6 +84,8 @@ export default function SignIn() {
                 id="password"
                 // autoComplete="new-password"
                 variant="outlined"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
               />
             </Grid>
           </Grid>
