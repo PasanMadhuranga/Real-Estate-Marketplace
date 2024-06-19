@@ -22,7 +22,7 @@ export default function OAuth() {
       const body = {
         username: result.user.displayName,
         email: result.user.email,
-        photo: result.user.photoURL,
+        avatar: result.user.photoURL,
       };
 
       const response = await axios.post("/api/auth/google", body, {
