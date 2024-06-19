@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Link,useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Avatar from '@mui/material/Avatar';
+import { green } from '@mui/material/colors';
 
 export default function Header() {
     const { currentUser } = useSelector((state) => state.user);
@@ -34,32 +35,33 @@ export default function Header() {
 
 
     return (
-        <AppBar color='default' elevation={1} sx={{position: "sticky", top: 0}} >
+        <AppBar color='default' elevation={1} sx={{position: "sticky", top: 0,bgcolor:green[600]}} >
             <Toolbar>
                 <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="h6" noWrap component={Link} to="/" sx={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Typography variant="h6" noWrap component={Link} to="/" sx={{ textDecoration: 'none', color:'white' }}>
                         <span>Real</span>
                         <span>Estate</span>
                     </Typography>
                 </Box>
-                <Box  component='form' onSubmit={handleSubmit} sx={{ p: '2px 4px', display: 'flex' , alignItems: 'center', width: 'auto', border:'1px solid ', borderRadius:'10px'}}>
+                <Box  component='form' onSubmit={handleSubmit} sx={{ p: '2px 4px', display: 'flex' , alignItems: 'center', width: 'auto', border:'1px  white', mr:5,bgcolor:green[300],opacity:"0.7"}}>
+                    <IconButton type="submit" sx={{ p: '10px', color:'white'}} aria-label="search">
+                        <SearchIcon />
+                    </IconButton>
                     <InputBase
-                        sx={{ ml: 1, flex: 1 }}
+                        sx={{ ml: 1, flex: 1,color:'white',opacity:"1.5"}}
                         placeholder="Search..."
                         inputProps={{ 'aria-label': 'search' }}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     
-                    <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
-                        <SearchIcon />
-                    </IconButton>
+                    
                 </Box>
-                <Button color="inherit" component={Link} to="/">Home</Button>
-                <Button color="inherit" component={Link} to="/about">About</Button>
+                <Button color="inherit" component={Link} to="/" sx={{color:'white',mx:1}}>Home</Button>
+                <Button color="inherit" component={Link} to="/about" sx={{color:'white'}}>About</Button>
                 {
                     currentUser ? (
-                        <Avatar src={currentUser.avatar} alt="profile" sx={{ width: 40, height: 40 }} component={Link} to="/profile"/>
+                        <Avatar src={currentUser.avatar} alt="profile" sx={{ width: 40, height: 40 ,ml:2}} component={Link} to="/profile"/>
                     ) : (
                         <Button color="inherit" component={Link} to="/sign-in">SIGN IN</Button>
                     )
