@@ -19,19 +19,21 @@ const Footer = () => {
       borderTop: '1px solid #e0e0e0',
       backgroundColor: green[700],
       color: 'white',
+      
+      
     },
   };
 
   return (
-    <footer style={styles.footer}>
-      <Container maxWidth="lg" color='success'>
+    <div style={styles.footer}>
+      <Container maxWidth='lg' sx={{display:'flex', flexWrap:'wrap'}}>
         <Grid container spacing={4} justifyContent="space-between" alignItems="center">
-          <Grid item style={styles.logo}>
+          <Grid item >
             <Typography variant="h6" >
               RealEstate
             </Typography>
           </Grid>
-          <Grid item>
+          <Grid item >
             <Box sx={{display:'flex',flexDirection:'column',alignItems:'center'}} >
             <Typography variant="body2"  sx={{mb:1,opacity:'0.7'}}>
                 Copyright &copy;
@@ -42,7 +44,7 @@ const Footer = () => {
             </Typography>
             </Box>
           </Grid>
-          <Grid item>
+          <Grid item >
             <IconButton color="inherit" href="#">
               <GitHubIcon />
             </IconButton>
@@ -56,7 +58,7 @@ const Footer = () => {
           
         </Grid>
       </Container>
-    </footer>
+    </div>
   );
 };
 
