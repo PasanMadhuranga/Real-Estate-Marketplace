@@ -5,21 +5,13 @@ import {
   Typography,
   CardActions,
   Button,
-  CardMedia,
   Box,
   Link,
 } from "@mui/material";
 import theme from "../themes/theme";
 import { ThemeProvider } from "@mui/material/styles";
-// import { useNavigate } from "react-router-dom";
 
 export default function ListingCard({ id, handleDeleteListing, imgUrl, name }) {
-  // const navigate = useNavigate();
-
-  // const handleEdit = () => {
-  //   navigate(`/edit-listing/${id}`);
-  // };
-  // console.log("key", id)
   return (
     <ThemeProvider theme={theme}>
       <Card
@@ -29,7 +21,7 @@ export default function ListingCard({ id, handleDeleteListing, imgUrl, name }) {
           mb: 2,
           display: "flex",
           bgcolor: "nature.dark",
-          boxShadow: 4,
+          boxShadow: 2,
           alignItems: "center",
           textDecoration: "none",
         }}
