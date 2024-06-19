@@ -11,25 +11,31 @@ import Listing from './pages/Listing'
 import Search from './pages/Search'
 import Footer from './components/Footer'
 import Header from './components/Header'
+import { Box, CssBaseline } from '@mui/material'
 
 export default function App() {
   return (
-    <BrowserRouter>
-    <Header/>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/listing/:listingId" element={<Listing />} />
-        <Route path="/search" element={<Search />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/create-listing" element={<CreateListing/>}/>
-          <Route path="/edit-listing/:listingId" element={<EditListing/>}/>
-        </Route>
-      </Routes>
-      <Footer/>
-    </BrowserRouter>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Header />
+        <Box sx={{ flex: '1 0 auto' }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/sign-in" element={<SignIn />} />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/listing/:listingId" element={<Listing />} />
+            <Route path="/search" element={<Search />} />
+            <Route element={<PrivateRoute />}>
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/create-listing" element={<CreateListing />} />
+              <Route path="/edit-listing/:listingId" element={<EditListing />} />
+            </Route>
+          </Routes>
+        </Box>
+        <Footer />
+      </BrowserRouter>
+    </Box>
   )
 }

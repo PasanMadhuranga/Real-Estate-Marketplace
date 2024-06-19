@@ -18,12 +18,15 @@ const Footer = () => {
       borderTop: "1px solid #e0e0e0",
       backgroundColor: green[700],
       color: "white",
+      // marginTop: "auto",
+//       position:"fixed",
+// bottom:0
     },
   };
 
   return (
     <footer style={styles.footer}>
-      <Container color="success" maxWidth="lg">
+      <Container color="success" maxWidth="lg" minHeight= "100vh">
         <Grid
           container
           spacing={2}
