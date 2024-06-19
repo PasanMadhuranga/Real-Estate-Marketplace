@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Oval } from "react-loader-spinner";
 import ImageSlider from "../components/ImageSlider";
-import { Box, Typography, Button, Chip, Divider, Alert } from "@mui/material";
+import { Box, Typography, Button, Chip, Divider, Alert,Grid } from "@mui/material";
 import BedIcon from "@mui/icons-material/Bed";
 import BathtubIcon from "@mui/icons-material/Bathtub";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
@@ -112,46 +112,60 @@ export default function Listing() {
               display="flex"
               justifyContent="space-between"
               alignItems="center"
-              sx={{mt: 2, mb: 3}}
+              sx={{mt: 2}}
             >
-              <Box display="flex" alignItems="center">
-                <BedIcon color="secondary" />
-                <Typography variant="body2" ml={1}>
-                  {listing.bedrooms} Beds
-                </Typography>
-              </Box>
-              <Box display="flex" alignItems="center">
-                <BathtubIcon color="secondary" />
-                <Typography variant="body2" ml={1}>
-                  {listing.bathrooms} Baths
-                </Typography>
-              </Box>
-              <Box display="flex" alignItems="center">
-                <DirectionsCarIcon
-                  color={listing.parking ? "secondary" : "disabled"}
-                />
-                <Typography variant="body2" ml={1}>
-                  {listing.parking ? "Parking" : "No Parking"}
-                </Typography>
-              </Box>
-              <Box display="flex" alignItems="center">
-                {listing.furnished ? (
-                  <>
-                    <CheckIcon color="success" />
-                    <Typography variant="body2" ml={1}>
-                      Furnished
-                    </Typography>
-                  </>
-                ) : (
-                  <>
-                    <CloseIcon color="error" />
-                    <Typography variant="body2" ml={1}>
-                      Not Furnished
-                    </Typography>
-                  </>
-                )}
-                {/* <CheckIcon color="primary" /> */}
-              </Box>
+            <Grid container>
+              <Grid item xs={6} sm={3} sx={{mb:3}}>
+                <Box display="flex" alignItems="center" justifyContent="start">
+                  <BedIcon color="secondary" />
+                  <Typography variant="body2" ml={1}>
+                    {listing.bedrooms} Beds
+                  </Typography>
+                </Box>
+              </Grid> 
+
+              <Grid item xs={6} sm={3}sx={{mb:3 }}>
+                <Box display="flex" alignItems="center" justifyContent="start">
+                  <BathtubIcon color="secondary" />
+                  <Typography variant="body2" ml={1}>
+                    {listing.bathrooms} Baths
+                  </Typography>
+                </Box>
+              </Grid>
+
+              <Grid item xs={6} sm={3}>
+                <Box display="flex" alignItems="center" justifyContent="start">
+                  <DirectionsCarIcon
+                    color={listing.parking ? "secondary" : "disabled"}
+                  />
+                  
+                  <Typography variant="body2" ml={1}>
+                    {listing.parking ? "Parking" : "No Parking"}
+                  </Typography>
+                </Box>
+              </Grid>
+
+              <Grid item xs={6} sm={3}>
+                <Box display="flex" alignItems="center" justifyContent="start">
+                  {listing.furnished ? (
+                    <>
+                      <CheckIcon color="success" />
+                      <Typography variant="body2" ml={1}>
+                        Furnished
+                      </Typography>
+                    </>
+                  ) : (
+                    <>
+                      <CloseIcon color="error" />
+                      <Typography variant="body2" ml={1}>
+                        Not Furnished
+                      </Typography>
+                    </>
+                  )}
+                  {/* <CheckIcon color="primary" /> */}
+                </Box>
+                </Grid>
+              </Grid>
             </Box>
             {currentUser && currentUser._id !== listing.userRef && (contact ? (
               <Contact listing={listing} />
