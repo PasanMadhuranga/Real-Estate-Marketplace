@@ -1,5 +1,6 @@
 import { errorHandler } from "../utils/error.js";
 import User from "../models/user.model.js";
+import Listing from "../models/listing.model.js";
 import bcryptjs from "bcryptjs";
 
 export const updateUser = async (req, res, next) => {
@@ -50,9 +51,18 @@ export const deleteUser = async (req, res, next) => {
     return next(errorHandler(401, "You can delete only your account"));
 
   try {
+    // Find the user and their listings
+    const user = await User.findById(req.params.id);
+    if (!user) return next(errorHandler(404, "User not found"));
+
+    // Delete all listings of the user
+    await Listing.deleteMany({ userRef: user._id });
+
+    // Delete the user
     await User.findByIdAndDelete(req.params.id);
+
     res.clearCookie("access_token");
-    res.status(200).json("User has been deleted");
+    res.status(200).json("User and their listings have been deleted");
   } catch (error) {
     next(error);
   }
