@@ -57,8 +57,8 @@ export default function CreateListing() {
     offer: false,
     bedrooms: 1,
     bathrooms: 1,
-    regularPrice: undefined,
-    discountPrice: undefined,
+    regularPrice: "",
+    discountPrice: "",
     imageUrls: [],
   });
 
@@ -70,10 +70,12 @@ export default function CreateListing() {
 
   const { currentUser } = useSelector((state) => state.user);
 
-  console.log("files:", files);
+  // console.log("files:", files);
   const handleImageSubmit = (e) => {
-    console.log("insidehandlesubmit");
-    if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
+    if (files.length === 0) {
+      setImageUploadError("Please select an image");
+    }
+    else if (files.length + formData.imageUrls.length <= 6) {
       setUploading(true);
       setImageUploadError("");
 
