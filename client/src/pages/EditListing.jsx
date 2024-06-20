@@ -53,10 +53,10 @@ export default function EditListing() {
   const navigate = useNavigate();
   const params = useParams(); //to get the listing id to load the edit-listing page with respective data
 
+  // const { currentUser } = useSelector((state) => state.user);
 
-  const { currentUser } = useSelector((state) => state.user);
-
-  console.log("formdata", formData);
+  // console.log("formdata", formData);
+  console.log("files", files);
   const handleImageSubmit = (e) => {
     console.log("insidehandlesubmit");
     if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
@@ -72,13 +72,15 @@ export default function EditListing() {
           setFormData({
             ...formData,
             imageUrls: formData.imageUrls.concat(urls),
-          });
+          }
+        );
           setImageUploadError("");
           setUploading(false);
+          setFiles([]);/// newly added by pasan
         })
         .catch((error) => {
           // console.log(error);
-          setImageUploadError("Image Upload failed(2 mb max per image)");
+          setImageUploadError("Image Upload failed(5 mb max per image)");
           setUploading(false);
         });
     } else {
@@ -87,6 +89,7 @@ export default function EditListing() {
       setUploading(false);
     }
   };
+
 
   //Great question! The resolve and reject functions are used inside the promise to indicate the completion (success or failure) of the asynchronous operation.
   //The .then and .catch methods are used to handle the outcome of the promise once it has been resolved or rejected.
@@ -145,7 +148,8 @@ export default function EditListing() {
           return;
         }
         // console.log("response.data", response.data);
-        setFormData(response.data);
+        const {name, description, address, type, parking, furnished, offer, bedrooms, bathrooms, regularPrice, discountPrice, imageUrls} = response.data;
+        setFormData({name, description, address, type, parking, furnished, offer, bedrooms, bathrooms, regularPrice, discountPrice, imageUrls});
       } catch (error) {}
     };
     fetchListing();
@@ -157,9 +161,7 @@ const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const body = {
-        ...formData,
-      };
+      const body = {...formData};
       if (body.imageUrls.length === 0) {
         setError("Please upload at least one image");
         setLoading(false);
@@ -454,6 +456,7 @@ const handleSubmit = async (e) => {
             {formData.imageUrls.length > 0 &&
               formData.imageUrls.map((url, index) => (
                 <Card
+                  key={url}
                   sx={{
                     width: 220,
                     margin: "auto",

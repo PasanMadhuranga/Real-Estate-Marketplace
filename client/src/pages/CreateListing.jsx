@@ -70,7 +70,7 @@ export default function CreateListing() {
 
   const { currentUser } = useSelector((state) => state.user);
 
-  console.log("formdata", formData);
+  console.log("files:", files);
   const handleImageSubmit = (e) => {
     console.log("insidehandlesubmit");
     if (files.length > 0 && files.length + formData.imageUrls.length <= 6) {
@@ -83,16 +83,21 @@ export default function CreateListing() {
       }
       Promise.all(promises)
         .then((urls) => {
+          console.log("set form data")
           setFormData({
             ...formData,
             imageUrls: formData.imageUrls.concat(urls),
-          });
+          }
+        );
+          console.log("SetFile to null, inside handleImageSubmit before set error")
           setImageUploadError("");
           setUploading(false);
+          console.log("SetFile to null, inside handleImageSubmit")
+          setFiles([]);/// newly added by pasan
         })
         .catch((error) => {
           // console.log(error);
-          setImageUploadError("Image Upload failed(2 mb max per image)");
+          setImageUploadError("Image Upload failed(5 mb max per image)");
           setUploading(false);
         });
     } else {
