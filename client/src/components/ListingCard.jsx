@@ -56,7 +56,6 @@ export default function ListingCard({ id, handleDeleteListing, imgUrl, name }) {
           <Button
             variant="contained"
             size="small"
-            type="text"
             href={`/edit-listing/${id}`}
             // onClick={handleEdit}
           >

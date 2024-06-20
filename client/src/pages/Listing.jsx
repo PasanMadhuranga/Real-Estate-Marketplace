@@ -12,6 +12,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useSelector } from "react-redux";
 import Contact from "../components/Contact";
+import { useNavigate } from "react-router-dom";
 
 export default function Listing() {
   const [listing, setListing] = useState(null);
@@ -20,6 +21,8 @@ export default function Listing() {
   const [contact, setContact] = useState(false);
   const { listingId } = useParams();
   const { currentUser } = useSelector((state) => state.user);
+
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchListing = async () => {
       try {
@@ -39,6 +42,16 @@ export default function Listing() {
     };
     fetchListing();
   }, [listingId]);
+
+  const handleDeleteListing = async () => {
+    try {
+      await axios.delete(`/api/listing/delete/${listingId}`);;
+      navigate("/profile");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <>
       {loading && (
@@ -124,7 +137,7 @@ export default function Listing() {
                 </Box>
               </Grid> 
 
-              <Grid item xs={6} sm={3}sx={{mb:3 }}>
+              <Grid item xs={6} sm={3} sx={{ mb:3 }}>
                 <Box display="flex" alignItems="center" justifyContent="start">
                   <BathtubIcon color="secondary" />
                   <Typography variant="body2" ml={1}>
@@ -133,7 +146,7 @@ export default function Listing() {
                 </Box>
               </Grid>
 
-              <Grid item xs={6} sm={3}>
+              <Grid item xs={6} sm={3} sx={{ mb:3 }}>
                 <Box display="flex" alignItems="center" justifyContent="start">
                   <DirectionsCarIcon
                     color={listing.parking ? "secondary" : "disabled"}
@@ -167,7 +180,7 @@ export default function Listing() {
                 </Grid>
               </Grid>
             </Box>
-            {currentUser && currentUser._id !== listing.userRef && (contact ? (
+            {currentUser && (currentUser._id !== listing.userRef ? (contact ? (
               <Contact listing={listing} />
             ) : (
               <Button
@@ -179,7 +192,18 @@ export default function Listing() {
               >
                 contact landlord
               </Button>
-            ))}
+            )): <>
+            <Button variant="contained" size="small" color="info" href={`/edit-listing/${listing._id}`}>Edit</Button>
+            <Button
+            variant="contained"
+            color="error"
+            size="small"
+            onClick={handleDeleteListing}
+            sx={{ml:3}}
+          >
+            Delete
+          </Button>
+            </>)}
           </Box>
         </>
       )}
