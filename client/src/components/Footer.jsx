@@ -26,7 +26,7 @@ const Footer = () => {
 
   return (
     <footer style={styles.footer}>
-      <Container color="success" maxWidth="lg" minHeight= "100vh">
+      <Container color="success" maxWidth="lg">
         <Grid
           container
           spacing={2}
