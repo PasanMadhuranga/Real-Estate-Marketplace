@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { alpha, styled } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
+import Logo from "./Logo";
 
 // This button is a styled version of the Button component from Material-UI
 const StyledSearchButton = styled(Button)(({ theme }) => ({
@@ -140,22 +141,9 @@ export default function Header() {
               </MenuItem>
             </Menu>
           </Box>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
-              fontWeight: 700,
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            RealEstate
-          </Typography>
+          <Box sx={{ display: { xs: "none", md: "flex" }, mr: 2 }}>
+            <Logo />
+          </Box>
           <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
             <Search>
               <SearchIconWrapper>

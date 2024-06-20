@@ -8,6 +8,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import { green } from "@mui/material/colors";
+import Logo from "./Logo";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -19,8 +20,8 @@ const Footer = () => {
       backgroundColor: green[700],
       color: "white",
       // marginTop: "auto",
-//       position:"fixed",
-// bottom:0
+      //       position:"fixed",
+      // bottom:0
     },
   };
 
@@ -34,22 +35,14 @@ const Footer = () => {
           alignItems="center"
         >
           <Grid item xs={12} sm={4}>
-            <Typography
-              variant="h6"
-              noWrap
-              component="a"
-              href="/"
+            <Box
               sx={{
-                fontFamily: "monospace",
-                fontWeight: 700,
-                color: "white",
-                textDecoration: "none",
                 display: { xs: "flex", md: "block" },
                 justifyContent: { xs: "center", md: "start" },
               }}
             >
-              RealEstate
-            </Typography>
+              <Logo />
+            </Box>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Box
