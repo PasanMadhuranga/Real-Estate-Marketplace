@@ -50,4 +50,12 @@ export const listingSchema = yup.object().shape({
       )
       .required("Username is required"),
     email: yup.string().email("Invalid email").required("Email is required"),
+    password: yup
+      .string()
+      .test(
+        "empty-or-valid",
+        "Password must be at least 8 characters long",
+        value => value === "" || value.length >= 8
+      )
   });
+  
