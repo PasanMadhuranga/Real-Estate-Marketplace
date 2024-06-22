@@ -9,7 +9,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import { useState ,useEffect} from "react";
+import { useState, useEffect } from "react";
 import { app } from "../firebase";
 import {
   getStorage,
@@ -21,16 +21,24 @@ import {
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import axios from "axios";
-import { useNavigate,useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Alert } from "@mui/material";
-import { Card, CardMedia , CardActions} from '@mui/material';
+import { Card, CardMedia, CardActions } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { listingSchema } from "../validationSchemas";
+import Snackbar from "@mui/material/Snackbar";
+import { red } from "@mui/material/colors";
+import { useDispatch } from "react-redux";
+import { clearError } from "../redux/user/userSlice";
 
 export default function EditListing() {
   const [files, setFiles] = useState([]); //to choose the files
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false); // State to manage Snackbar visibility
+  const [imageUploadError, setImageUploadError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(false);
   // State for non-validated form data
   const [nonValidatedFormData, setNonValidatedFormData] = useState({
     type: "sale",
@@ -49,14 +57,29 @@ export default function EditListing() {
     resolver: yupResolver(listingSchema),
   });
 
-  const [imageUploadError, setImageUploadError] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(false);
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const params = useParams(); //to get the listing id to load the edit-listing page with respective data
 
-  // const { currentUser } = useSelector((state) => state.user);
+  //this use to avoid displaying old errors even after refrehsing the page
+  useEffect(() => {
+    dispatch(clearError()); // Clear error state when the component mounts
+  }, [dispatch]);
+
+  // useEffect to open the Snackbar whenever there is an error
+  useEffect(() => {
+    if (error) {
+      setOpen(true); // Open the Snackbar if there's an error
+    }
+  }, [error]); // Dependency array: runs the effect whenever `error` changes
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpen(false); // Close the Snackbar
+    dispatch(clearError()); // Clear error state when Snackbar is closed
+  };
 
   //use this fetch data when edit a listing page is loaded
   //this effect will run only once when the component is mounted. since [] is passed as the second argument to useEffect
@@ -71,7 +94,20 @@ export default function EditListing() {
           return;
         }
         // console.log("response.data", response.data);
-        const {name, description, address, type, parking, furnished, offer, bedrooms, bathrooms, regularPrice, discountPrice, imageUrls} = response.data;
+        const {
+          name,
+          description,
+          address,
+          type,
+          parking,
+          furnished,
+          offer,
+          bedrooms,
+          bathrooms,
+          regularPrice,
+          discountPrice,
+          imageUrls,
+        } = response.data;
         setNonValidatedFormData({
           type,
           parking,
@@ -88,7 +124,6 @@ export default function EditListing() {
           regularPrice,
           discountPrice,
         });
-
       } catch (error) {
         setError(error.response.data.message);
       }
@@ -96,12 +131,10 @@ export default function EditListing() {
     fetchListing();
   }, []);
 
-
   const handleImageSubmit = (e) => {
     if (files.length === 0) {
       setImageUploadError("Please select an image");
-    }
-    else if (files.length + formData.imageUrls.length <= 6) {
+    } else if (files.length + formData.imageUrls.length <= 6) {
       setUploading(true);
       setImageUploadError("");
 
@@ -114,11 +147,10 @@ export default function EditListing() {
           setFormData({
             ...formData,
             imageUrls: formData.imageUrls.concat(urls),
-          }
-        );
+          });
           setImageUploadError("");
           setUploading(false);
-          setFiles([]);/// newly added by pasan
+          setFiles([]); /// newly added by pasan
         })
         .catch((error) => {
           // console.log(error);
@@ -130,7 +162,6 @@ export default function EditListing() {
       setUploading(false);
     }
   };
-
 
   //Great question! The resolve and reject functions are used inside the promise to indicate the completion (success or failure) of the asynchronous operation.
   //The .then and .catch methods are used to handle the outcome of the promise once it has been resolved or rejected.
@@ -195,11 +226,15 @@ export default function EditListing() {
         return;
       }
 
-      const response = await axios.post(`/api/listing/edit/${params.listingId}`, body, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        `/api/listing/edit/${params.listingId}`,
+        body,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       setLoading(false);
       if (response.success === false) {
         setError(response.message);
@@ -213,6 +248,23 @@ export default function EditListing() {
 
   return (
     <Container component="main" maxWidth="lg">
+      {error && (
+        <Snackbar
+          open={open}
+          autoHideDuration={5000}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        >
+          <Alert
+            onClose={handleClose}
+            severity="error"
+            variant="filled"
+            sx={{ width: "100%", bgcolor: red[400] }}
+          >
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
       <Box
         sx={{
           mt: 8,
@@ -462,11 +514,6 @@ export default function EditListing() {
           >
             {loading ? "Loading..." : "EDIT LISTING"}
           </Button>
-          {error && (
-            <Alert sx={{ mb: 2 }} severity="error">
-              {error}
-            </Alert>
-          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
