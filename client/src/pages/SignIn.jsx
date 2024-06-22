@@ -9,24 +9,46 @@ import Alert from '@mui/material/Alert';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice";
+import { signInStart, signInSuccess, signInFailure,clearError } from "../redux/user/userSlice";
 import OAuth from "../components/OAuth";
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import Snackbar from '@mui/material/Snackbar';
+import { red } from '@mui/material/colors';
 
 
 export default function SignIn() {
-  const [formData, setFormData] = useState({email: "", password: ""});
-  const {loading, error} = useSelector((state) => state.user);
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [open, setOpen] = useState(false); // State to manage Snackbar visibility
+  const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  //this use to avoid displaying old errors even after refrehsing the page
+  useEffect(() => {
+    dispatch(clearError()); // Clear error state when the component mounts
+  }, [dispatch]);
+
+  // useEffect to open the Snackbar whenever there is an error
+  useEffect(() => {
+    if (error) {
+      setOpen(true); // Open the Snackbar if there's an error
+    }
+  }, [error]); // Dependency array: runs the effect whenever `error` changes
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false); // Close the Snackbar
+    dispatch(clearError()); // Clear error state when Snackbar is closed
+  };
+
+  //function to handle the form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
     dispatch(signInStart());
-    // FormData is a built-in JavaScript object that easily captures the data from the form fields.
-    // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
-    const data = new FormData(event.currentTarget);
-    const body = {...formData};
+
+    const body = { ...formData };
 
     try {
       const response = await axios.post("/api/auth/signin", body, {
@@ -39,14 +61,18 @@ export default function SignIn() {
     } catch (error) {
       dispatch(signInFailure(error.response.data.message));
     }
-    // "/api/users": The URL to which the request is sent. This is typically an endpoint on your server that handles user registration.
-    // method: "POST": Specifies that this is a POST request, meaning data will be sent to the server.
-    // headers: {"Content-Type": "application/json"}: Sets the Content-Type header to application/json, indicating that the request body contains JSON data.
-    // body: JSON.stringify(body): Converts the body object (which contains the form data) to a JSON string to be sent as the request body.
   };
-
+ 
   return (
     <Container component="main" maxWidth="xs">
+      {/* // Snackbar to display error messages if only there is an error */}
+      { error && 
+        <Snackbar open={open} autoHideDuration={5000} onClose={handleClose}  anchorOrigin={{vertical:'top',horizontal:'left'}}>
+            <Alert onClose={handleClose} severity="error" variant="filled" sx={{width:'100%',bgcolor:red[400]}}>
+              {error}
+            </Alert>
+        </Snackbar>
+      } 
       <Box
         sx={{
           marginTop: 8,
@@ -60,7 +86,6 @@ export default function SignIn() {
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
-            
             <Grid item xs={12}>
               <TextField
                 required
@@ -68,10 +93,9 @@ export default function SignIn() {
                 id="email"
                 label="Email Address"
                 name="email"
-                // autoComplete="email"
                 variant="outlined"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </Grid>
             <Grid item xs={12}>
@@ -82,10 +106,9 @@ export default function SignIn() {
                 label="Password"
                 type="password"
                 id="password"
-                // autoComplete="new-password"
                 variant="outlined"
                 value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
             </Grid>
           </Grid>
@@ -104,7 +127,7 @@ export default function SignIn() {
             Don't have an account? Sign up
           </Link>
         </Box>
-        {error && <Alert sx={{mt: 2}} severity="error">{error}</Alert>}
+        
       </Box>
     </Container>
   );
