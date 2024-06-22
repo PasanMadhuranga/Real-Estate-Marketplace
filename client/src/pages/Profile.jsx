@@ -31,6 +31,10 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import ListingCard from "../components/ListingCard";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { updateProfileSchema } from "../validationSchemas";
+
 
 export default function Profile() {
   const fileRef = useRef(null);
@@ -40,7 +44,7 @@ export default function Profile() {
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
-  const [formData, setFormData] = useState({});
+  // const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showListingsError, setShowListingsError] = useState(false);
   const [listings, setListings] = useState([]);
@@ -79,22 +83,29 @@ export default function Profile() {
       () => {
         //getDownloadURL(uploadTask.snapshot.ref) retrieves the download URL for the uploaded file.
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-          setFormData({ ...formData, avatar: downloadURL })
+          setAvatar(downloadURL) //set the avatar to the download url of the uploaded file
         );
       }
     );
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const [avatar, setAvatar] = useState("");
+
+  //this is the form validation using yup
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm({
+    resolver: yupResolver(updateProfileSchema),
+  });
+
+  const onSubmit = async (data) => {
+    // event.preventDefault();
     dispatch(updateUserStart());
-    const data = new FormData(event.currentTarget);
-    const body = {
-      username: data.get("username"),
-      email: data.get("email"),
-      password: data.get("password"),
-      avatar: formData.avatar || currentUser.avatar,
-    };
+    // const data = new FormData(event.currentTarget);
+    const body = {...data, avatar: avatar || currentUser.avatar};
     try {
       const response = await axios.post(
         `/api/user/update/${currentUser._id}`,
@@ -113,7 +124,7 @@ export default function Profile() {
       setUpdateSuccess(true); // This is used to show the success message
     } catch (error) {
       dispatch(updateUserFailure(error.response.data.message));
-    }
+    };
   };
 
   const handleDeleteUser = async () => {
@@ -173,7 +184,6 @@ export default function Profile() {
   };
 
   
-
   return (
     <>
       <Container component="main" maxWidth="xs">
@@ -199,7 +209,7 @@ export default function Profile() {
         />
         <Avatar
           onClick={() => fileRef.current.click()}
-          src={formData.avatar || currentUser.avatar}
+          src={avatar || currentUser.avatar}
           alt="profile"
           sx={{ mt: 2, bgcolor: "secondary.main", width: 100, height: 100 }}
         />
@@ -217,43 +227,65 @@ export default function Profile() {
             ""
           )}
         </p>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
+              <Controller
                 name="username"
-                required
-                fullWidth
-                id="username"
-                label="Username"
-                autoFocus
-                variant="outlined"
+                control={control}
                 defaultValue={currentUser.username}
-                // onChange={handleChange} no need in mui
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    id="username"
+                    label="Username"
+                    autoFocus
+                    color="success"
+                    variant="outlined"
+                    error={!!errors.username}
+                    helperText={errors.username?.message} // This is similar to errors.username && errors.username.message
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
+              <Controller
                 name="email"
-                // autoComplete="email"
-                variant="outlined"
+                control={control}
                 defaultValue={currentUser.email}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    variant="outlined"
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                    color="success"
+                  />
+                )}
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                // required
-                fullWidth
+              <Controller
                 name="password"
-                label="Password"
-                type="password"
-                id="password"
-                // autoComplete="new-password"
-                variant="outlined"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    id="password"
+                    label="Password"
+                    type="password"
+                    variant="outlined"
+                    error={!!errors.password}
+                    helperText={errors.password?.message}
+                    color="success"
+                  />
+                )}
               />
             </Grid>
           </Grid>

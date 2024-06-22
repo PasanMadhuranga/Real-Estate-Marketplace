@@ -96,6 +96,7 @@ export default function SignIn() {
                 variant="outlined"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                color="success"
               />
             </Grid>
             <Grid item xs={12}>
@@ -109,6 +110,7 @@ export default function SignIn() {
                 variant="outlined"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                color="success"
               />
             </Grid>
           </Grid>
