@@ -21,6 +21,7 @@ import {
   signOutUserStart,
   signOutUserSuccess,
   signOutUserFailure,
+  clearError
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
@@ -52,6 +53,10 @@ export default function Profile() {
   //initialize dispatch to use it to dispatch actions
   const dispatch = useDispatch();
 
+  //this useEffect is used to clear the error state when the component mounts
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
   //this useEffect is used to upload the file to the firebase storage
   //everytime when there is change in the file state, the file will be uploaded by this effect
   useEffect(() => {
@@ -96,7 +101,7 @@ export default function Profile() {
     control,
     handleSubmit,
     formState: { errors },
-    reset
+    // reset
   } = useForm({
     resolver: yupResolver(updateProfileSchema),
   });
@@ -216,13 +221,13 @@ export default function Profile() {
         {/* //this p elemnt implements the showing of the progress of the file upload */}
         <p>
           {fileUploadError ? (
-            <span >
-              Error Image upload (image must be less than 2 mb)
-            </span>
+            <small >
+              Error Image upload (image must be less than 5 mb)
+            </small>
           ) : filePerc > 0 && filePerc < 100 ? (
-            <span>{`Uploading ${filePerc}%`}</span>
+            <small>{`Uploading ${filePerc}%`}</small>
           ) : filePerc === 100 ? (
-            <span >Image successfully uploaded!</span>
+            <small >Image successfully uploaded!</small>
           ) : (
             ""
           )}
@@ -233,7 +238,7 @@ export default function Profile() {
               <Controller
                 name="username"
                 control={control}
-                defaultValue={currentUser.username}
+                defaultValue={currentUser.username} //since we use redux ,we had not have to use the reset function to reset the form
                 render={({ field }) => (
                   <TextField
                     {...field}

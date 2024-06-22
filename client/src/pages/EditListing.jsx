@@ -274,7 +274,7 @@ export default function EditListing() {
         }}
       >
         <Typography component="h1" variant="h3">
-          Create a Listing
+          Edit a Listing
         </Typography>
       </Box>
       <Grid
@@ -512,7 +512,7 @@ export default function EditListing() {
             disabled={loading}
             color="success"
           >
-            {loading ? "Loading..." : "EDIT LISTING"}
+            {loading ? "Loading..." : "SAVE CHANGES"}
           </Button>
         </Grid>
         <Grid item xs={12} md={6}>

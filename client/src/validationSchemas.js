@@ -1,27 +1,49 @@
 import * as yup from "yup";
 
 export const listingSchema = yup.object().shape({
-    name: yup
-      .string()
-      .required("Name is required")
-      .min(5, "Name must be at least 5 characters long"),
-    description: yup
-      .string()
-      .required("Description is required")
-      .min(50, "Description must be at least 50 characters long"),
-    address: yup
-      .string()
-      .required("Address is required")
-      .min(10, "Address must be at least 10 characters long"),
-    bedrooms: yup.number().required("Bedrooms is required").positive().integer(),
-    bathrooms: yup
-      .number()
-      .required("Bathrooms is required")
-      .positive()
-      .integer(),
-    regularPrice: yup.number().required("Regular Price is required").positive(),
-    discountPrice: yup.number().required("Discount Price is required").positive(),
-  });
+  name: yup
+    .string()
+    .required()
+    .min(5, "Name must be at least 5 characters long"),
+  description: yup
+    .string()
+    .required()
+    .min(50, "Description must be at least 50 characters long"),
+  address: yup
+    .string()
+    .required()
+    .min(10, "Address must be at least 10 characters long"),
+  bedrooms: yup
+    .number()
+    .transform((value, originalValue) => {
+      return originalValue === '' ? undefined : value;
+    })
+    .required()
+    .positive()
+    .integer(),
+  bathrooms: yup
+    .number()
+    .transform((value, originalValue) => {
+      return originalValue === '' ? undefined : value;
+    })
+    .required()
+    .positive()
+    .integer(),
+  regularPrice: yup
+    .number()
+    .transform((value, originalValue) => {
+      return originalValue === '' ? undefined : value;
+    })
+    .required()
+    .positive(),
+  discountPrice: yup
+    .number()
+    .transform((value, originalValue) => {
+      return originalValue === '' ? undefined : value;
+    })
+    .required()
+    .positive(),
+});
 
   export const signupSchema = yup.object().shape({
     username: yup

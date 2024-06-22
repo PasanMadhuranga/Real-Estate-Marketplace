@@ -77,12 +77,12 @@ export const signInSchema = Joi.object({
 export const googleLoginSchema = Joi.object({
     username: Joi.string().required().escapeHTML(),
     email: Joi.string().email().required().escapeHTML(),
-    avatar: Joi.string().uri().required().escapeHTML()
+    avatar: Joi.string().uri().required()
 });
 
 export const updateProfileSchema = Joi.object({
     username: Joi.string().required().escapeHTML(),
     email: Joi.string().email().required().escapeHTML(),
-    avatar: Joi.string().uri().required().escapeHTML(),
+    avatar: Joi.string().uri().required(),
     password: Joi.string().allow('').escapeHTML()
 });
