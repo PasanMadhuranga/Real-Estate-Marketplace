@@ -34,6 +34,9 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
     //these three reducers are for updating the user profile
     updateUserStart: (state) => {
       state.loading = true;
@@ -90,6 +93,7 @@ export const {
   signUpStart,
   signUpSuccess,
   signUpFailure,
+  clearError,
 } = userSlice.actions;
 
 export default userSlice.reducer;
