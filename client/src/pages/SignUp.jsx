@@ -21,7 +21,7 @@ import ValidatedTextField from "../components/ValidatedTextField";
 import { useRef } from "react";
 
 export default function SignUp() {
-  const isFormValid = useRef({ username: false, email: false, password: false });
+  const isFormValid = useRef({ username: false, email: false, password: false }); // we use useRef because we don't want to re-render the component when the form fields are validated
   const formData = useRef({ username: "", email: "", password: "" });
   const { error, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -56,7 +56,7 @@ export default function SignUp() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     dispatch(signUpStart());
-    if (Object.values(isFormValid.current).every((isValid) => isValid)) {
+    if (Object.values(isFormValid.current).every((isValid) => isValid)) { // Check if all form fields are valid
       const body = { ...formData.current };
       try {
         const response = await axios.post("/api/auth/signup", body, {
@@ -151,6 +151,7 @@ export default function SignUp() {
                   isFormValid.current.password = isValid;
                   formData.current.password = value;
                 }}
+                type="password"
               />
             </Grid>
           </Grid>

@@ -1,19 +1,6 @@
-export const emptyValidator = (value) => {
-  if (!value.trim()) return "value is empty";
-  return false;
-};
-
 export const usernameValidator = (value) => {
   if (!/^[a-zA-Z0-9_]+$/.test(value))
     return "can only contain letters, numbers, and underscores";
-  return false;
-};
-
-export const intervalValidator = (value, min, max) => {
-  const numValue = parseFloat(value);
-
-  if (isNaN(numValue) || numValue < numMin || numValue > numMax)
-    return `value must be between ${min} and ${max}`;
   return false;
 };
 
@@ -54,14 +41,22 @@ export const ListingDescriptionValidator = (value) => {
 
 export const ListingPriceValidator = (value) => {
   if (parseInt(value) <= 0) {
-    return "must be a positive number";
+    return "price must be a positive number";
   }
   return false;
 };
 
 export const ListingRoomValidator = (value) => {
   if (parseInt(value) <= 0 || parseInt(value) > 20) {
-    return "must be between 1 and 10";
+    return "must be between 1 and 20";
   }
+  return false;
+};
+
+export const ListingAddressValidator = (value) => {
+  if (!value.trim()) {
+    return "Address is empty";
+  }
+
   return false;
 };

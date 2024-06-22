@@ -56,8 +56,8 @@ export const editListingSchema = Joi.object({
     parking: Joi.boolean(),
     furnished: Joi.boolean(),
     offer: Joi.boolean(),
-    bedrooms: Joi.number().required().min(1).max(10),
-    bathrooms: Joi.number().required().min(1).max(10),
+    bedrooms: Joi.number().required().min(1).max(20),
+    bathrooms: Joi.number().required().min(1).max(20),
     regularPrice: Joi.number().min(0),
     discountPrice: Joi.number().min(0),
     imageUrls: Joi.array().items(Joi.string().uri())
