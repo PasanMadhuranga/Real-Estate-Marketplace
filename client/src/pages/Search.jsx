@@ -70,7 +70,7 @@ export default function Search() {
         setListings(response.data.slice(0, 2));
         setLoading(false);
       } catch (error) {
-        console.error(error);
+        // console.error(error);
         setLoading(false);
       }
     };
@@ -103,7 +103,7 @@ export default function Search() {
       }
       setLoading(false);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       setLoading(false);
     }
   };
@@ -136,8 +136,8 @@ export default function Search() {
             value={sidebarData.searchTerm}
           />
           <RadioGroup
-            aria-labelledby="sell-rent-group"
-            name="sell-rent-group"
+            aria-labelledby="sale-rent-group"
+            name="sale-rent-group"
             row
             sx={{ mt: 1 }}
             onChange={(e) =>
@@ -151,7 +151,7 @@ export default function Search() {
               label="Rent & Sale"
             />
             <FormControlLabel
-              value="sell"
+              value="sale"
               control={<Radio color="success" />}
               label="Sale"
             />

@@ -6,11 +6,10 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-// import { styled } from "@mui/material/styles";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { app } from "../firebase";
 import {
   getStorage,
@@ -30,37 +29,18 @@ import CardMedia from "@mui/material/CardMedia";
 import CardActions from "@mui/material/CardActions";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-
-const schema = yup.object().shape({
-  name: yup
-    .string()
-    .required("Name is required")
-    .min(5, "Name must be at least 5 characters long"),
-  description: yup
-    .string()
-    .required("Description is required")
-    .min(50, "Description must be at least 50 characters long"),
-  address: yup
-    .string()
-    .required("Address is required")
-    .min(10, "Address must be at least 10 characters long"),
-  bedrooms: yup.number().required("Bedrooms is required").positive().integer(),
-  bathrooms: yup
-    .number()
-    .required("Bathrooms is required")
-    .positive()
-    .integer(),
-  regularPrice: yup.number().required("Regular Price is required").positive(),
-  discountPrice: yup.number().required("Discount Price is required").positive(),
-});
+import { listingSchema } from "../validationSchemas";
 
 export default function CreateListing() {
   const [files, setFiles] = useState([]); //to choose the files
   const [loading, setLoading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(false);
+
   // State for non-validated form data
   const [nonValidatedFormData, setNonValidatedFormData] = useState({
-    type: "sell",
+    type: "sale",
     parking: false,
     furnished: false,
     offer: false,
@@ -71,14 +51,9 @@ export default function CreateListing() {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
-    resolver: yupResolver(schema),
-  });
-
-  const [imageUploadError, setImageUploadError] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(false);
+    resolver: yupResolver(listingSchema),
+  });  
 
   const navigate = useNavigate();
 
@@ -98,17 +73,12 @@ export default function CreateListing() {
       }
       Promise.all(promises)
         .then((urls) => {
-          console.log("set form data");
           setNonValidatedFormData({
             ...nonValidatedFormData,
             imageUrls: nonValidatedFormData.imageUrls.concat(urls),
           });
-          console.log(
-            "SetFile to null, inside handleImageSubmit before set error"
-          );
           setImageUploadError("");
           setUploading(false);
-          console.log("SetFile to null, inside handleImageSubmit");
           setFiles([]); /// newly added by pasan
         })
         .catch((error) => {
@@ -117,7 +87,6 @@ export default function CreateListing() {
           setUploading(false);
         });
     } else {
-      console.log("inside else");
       setImageUploadError("You can only upload 6 images");
       setUploading(false);
     }
@@ -158,7 +127,6 @@ export default function CreateListing() {
     const imageRef = ref(storage, nonValidatedFormData.imageUrls[index]);
     deleteObject(imageRef)
       .then(() => {
-        console.log("Image deleted successfully");
         const newImageUrls = nonValidatedFormData.imageUrls.filter(
           (_, i) => i !== index
         );
@@ -168,7 +136,7 @@ export default function CreateListing() {
         });
       })
       .catch((error) => {
-        console.log("Error deleting image", error);
+        setError("Failed to delete image");
       });
   };
 
@@ -304,9 +272,9 @@ export default function CreateListing() {
               }
             >
               <FormControlLabel
-                value="sell"
+                value="sale"
                 control={<Radio color="success" />}
-                label="Sell"
+                label="Sale"
               />
               <FormControlLabel
                 value="rent"

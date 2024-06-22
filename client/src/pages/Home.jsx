@@ -52,16 +52,16 @@ export default function Home() {
       const response = await axios.get("/api/listing/get?offer=true&limit=4");
       setOfferListings(response.data);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
     }
   };
 
   const fetchSaleListings = async () => {
     try {
-      const response = await axios.get("/api/listing/get?type=sell&limit=4");
+      const response = await axios.get("/api/listing/get?type=sale&limit=4");
       setSaleListings(response.data);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
     }
   };
 
@@ -70,7 +70,7 @@ export default function Home() {
       const response = await axios.get("/api/listing/get?type=rent&limit=4");
       setRentListings(response.data);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
     }
   };
 
@@ -166,7 +166,7 @@ export default function Home() {
           transform: inViewSales ? 'translateY(0)' : 'translateY(20px)',
         }}
       >
-        <FeaturesSection title="Recent Sales" listings={saleListings} href="/search?type=sell&limit=4" />
+        <FeaturesSection title="Recent Sales" listings={saleListings} href="/search?type=sale&limit=4" />
       </Box>
 
       {/* Recent Rents Section */}

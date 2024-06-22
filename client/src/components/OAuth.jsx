@@ -18,7 +18,6 @@ export default function OAuth() {
       const auth = getAuth(app);
         // signInWithPopup(auth, provider): Signs in the user with the given provider using a pop-up window.
       const result = await signInWithPopup(auth, provider);
-      console.log("result",result);
       const body = {
         username: result.user.displayName,
         email: result.user.email,

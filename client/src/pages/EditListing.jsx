@@ -9,7 +9,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import { useState ,useEffect , useRef} from "react";
+import { useState ,useEffect} from "react";
 import { app } from "../firebase";
 import {
   getStorage,
@@ -18,64 +18,36 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
-import { useSelector } from "react-redux";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import axios from "axios";
 import { useNavigate,useParams } from "react-router-dom";
-import Input from "@mui/material/Input";
 import { Alert } from "@mui/material";
 import { Card, CardMedia , CardActions} from '@mui/material';
-import { ListingNameValidator, ListingDescriptionValidator, ListingPriceValidator, ListingRoomValidator, ListingAddressValidator } from "../components/inputValidators";
-import ValidatedTextField from "../components/ValidatedTextField"; 
-
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { listingSchema } from "../validationSchemas";
 
 export default function EditListing() {
   const [files, setFiles] = useState([]); //to choose the files
   const [loading, setLoading] = useState(false);
-  // const [formData, setFormData] = useState({
-  //   name: "",
-  //   description: "",
-  //   address: "",
-  //   type: "sell",
-  //   parking: false,
-  //   furnished: false,
-  //   offer: false,
-  //   bedrooms: 1,
-  //   bathrooms: 1,
-  //   regularPrice: 0,
-  //   discountPrice: 0,
-  //   imageUrls: [],
-  // });
-
-  const [nonValidatedformData, setNonValidatedformData] = useState({
-    type: "sell",
+  // State for non-validated form data
+  const [nonValidatedFormData, setNonValidatedFormData] = useState({
+    type: "sale",
     parking: false,
     furnished: false,
     offer: false,
     imageUrls: [],
   });
 
-  const [isFormValid,setIsFormValid] = useRef({
-    name: false,
-    description: false,
-    address: false,
-    bedrooms: false,
-    bathrooms: false,
-    regularPrice: false,
-    discountPrice: false,
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: yupResolver(listingSchema),
   });
-
-  const [validatedFormData,setValidatedFormData] = useState({
-    name: "",
-    description: "",  
-    address: "",
-    bedrooms: "",
-    bathrooms: "",
-    regularPrice: "",
-    discountPrice: "",
-  });
-
 
   const [imageUploadError, setImageUploadError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -86,13 +58,50 @@ export default function EditListing() {
 
   // const { currentUser } = useSelector((state) => state.user);
 
-  // console.log("formdata", formData);
-  // console.log("files", files);
+  //use this fetch data when edit a listing page is loaded
+  //this effect will run only once when the component is mounted. since [] is passed as the second argument to useEffect
+  //since it is not allowed to use async function as useEffect callback, we use an async function inside the useEffect callback
+  useEffect(() => {
+    const fetchListing = async () => {
+      const listingId = params.listingId;
+      try {
+        const response = await axios.get(`/api/listing/get/${listingId}`);
+        if (response.success === false) {
+          setError(response.message);
+          return;
+        }
+        // console.log("response.data", response.data);
+        const {name, description, address, type, parking, furnished, offer, bedrooms, bathrooms, regularPrice, discountPrice, imageUrls} = response.data;
+        setNonValidatedFormData({
+          type,
+          parking,
+          furnished,
+          offer,
+          imageUrls,
+        });
+        reset({
+          name,
+          description,
+          address,
+          bedrooms,
+          bathrooms,
+          regularPrice,
+          discountPrice,
+        });
+
+      } catch (error) {
+        setError(error.response.data.message);
+      }
+    };
+    fetchListing();
+  }, []);
+
+
   const handleImageSubmit = (e) => {
     if (files.length === 0) {
       setImageUploadError("Please select an image");
     }
-    else if (files.length + nonValidatedformData.imageUrls.length <= 6) {
+    else if (files.length + formData.imageUrls.length <= 6) {
       setUploading(true);
       setImageUploadError("");
 
@@ -102,9 +111,9 @@ export default function EditListing() {
       }
       Promise.all(promises)
         .then((urls) => {
-          setNonValidatedformData({
-            ...nonValidatedformData,
-            imageUrls: nonValidatedformData.imageUrls.concat(urls),
+          setFormData({
+            ...formData,
+            imageUrls: formData.imageUrls.concat(urls),
           }
         );
           setImageUploadError("");
@@ -117,7 +126,6 @@ export default function EditListing() {
           setUploading(false);
         });
     } else {
-      console.log("inside else");
       setImageUploadError("You can only upload 6 images");
       setUploading(false);
     }
@@ -156,52 +164,25 @@ export default function EditListing() {
   //(_, i) is the callback function used by filter. The underscore _ represents the current element (which we don't need in this case), and i is the index of the current element.
   const handleDeleteImage = (index) => {
     const storage = getStorage(app);
-    const imageRef = ref(storage, nonValidatedformData.imageUrls[index]);
+    const imageRef = ref(storage, formData.imageUrls[index]);
     deleteObject(imageRef)
       .then(() => {
-        console.log("Image deleted successfully");
-        const newImageUrls = nonValidatedformData.imageUrls.filter((_, i) => i !== index);
-        setFormData({ ...nonValidatedformData, imageUrls: newImageUrls });
+        const newImageUrls = formData.imageUrls.filter((_, i) => i !== index);
+        setFormData({ ...formData, imageUrls: newImageUrls });
       })
       .catch((error) => {
         setError("Failed to delete image");
       });
   };
 
-  //use this fetch data when edit a listing page is loaded
-  //this effect will run only once when the component is mounted. since [] is passed as the second argument to useEffect
-  //since it is not allowed to use async function as useEffect callback, we use an async function inside the useEffect callback
-  useEffect(() => {
-    const fetchListing = async () => {
-      const listingId = params.listingId;
-      try {
-        const response = await axios.get(`/api/listing/get/${listingId}`);
-        if (response.success === false) {
-          console.log(response.error);
-          return;
-        }
-        // console.log("response.data", response.data);
-        const {name, description, address, type, parking, furnished, offer, bedrooms, bathrooms, regularPrice, discountPrice, imageUrls} = response.data;
-        console.log("response.data", response.data);
-        // setFormData({name, description, address, type, parking, furnished, offer, bedrooms, bathrooms, regularPrice, discountPrice, imageUrls});
-        setNonValidatedformData({type, parking, furnished, offer, imageUrls});
-        // validatedFormData.current = {name, description, address, bedrooms, bathrooms, regularPrice, discountPrice};
-        setValidatedFormData({name, description, address, bedrooms, bathrooms, regularPrice, discountPrice});
-        console.log("nonValidatedformData", nonValidatedformData);
-        console.log("validatedFormData", validatedFormData);
-      } catch (error) {}
-    };
-    fetchListing();
-  }, []);
-
-
-//handlesubmit
-const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      // const body = {...formData};
-      const body = {...validatedFormData, ...nonValidatedformData};
+      const body = {
+        ...data,
+        ...nonValidatedFormData,
+      };
       if (body.imageUrls.length === 0) {
         setError("Please upload at least one image");
         setLoading(false);
@@ -214,21 +195,11 @@ const handleSubmit = async (e) => {
         return;
       }
 
-      if (!Object.values(isFormValid.current).every((isValid) => isValid)) { // Check if all form fields are valid
-        setError("Invalid form data");
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.post(
-        `/api/listing/edit/${params.listingId}`,
-        body,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(`/api/listing/edit/${params.listingId}`, body, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       setLoading(false);
       if (response.success === false) {
         setError(response.message);
@@ -251,59 +222,93 @@ const handleSubmit = async (e) => {
         }}
       >
         <Typography component="h1" variant="h3">
-          Edit a Listing
+          Create a Listing
         </Typography>
       </Box>
-      <Grid component="form" onSubmit={handleSubmit} container spacing={3}>
+      <Grid
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        container
+        spacing={3}
+      >
         <Grid item xs={12} md={6}>
-  
-          <ValidatedTextField
-            label="Name"
-            validator={ListingNameValidator}
-            onChangeFunc={(isValid, value) => {
-              isFormValid.name = isValid;
-              validatedFormData.name = value;
-            }}
-            sxProps={{ my: 1 }}
+          <Controller
+            name="name"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                id="name"
+                label="Name"
+                autoFocus
+                variant="outlined"
+                error={!!errors.name}
+                helperText={errors.name?.message}
+                color="success"
+                sx={{ my: 1 }}
+              />
+            )}
           />
-          
-          <ValidatedTextField
-            label="Description"
-            validator={ListingDescriptionValidator}
-            onChangeFunc={(isValid, value) => {
-              isFormValid.description = isValid;
-              validatedFormData.description = value;
-            }}
-            sxProps={{ my: 1 }}
-            multiline
-            rows={3}
+          <Controller
+            name="description"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                id="description"
+                label="Description"
+                variant="outlined"
+                error={!!errors.description}
+                helperText={errors.description?.message}
+                color="success"
+                sx={{ my: 1 }}
+                multiline
+                rows={3}
+              />
+            )}
           />
-          
-          <ValidatedTextField
-            label="Address"
-            validator={ListingAddressValidator}
-            onChangeFunc={(isValid, value) => {
-              isFormValid.address = isValid;
-              validatedFormData.address = value;
-            }}
-            sxProps={{ my: 1 }}
-            multiline
-            rows={2}
+          <Controller
+            name="address"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                id="address"
+                label="Address"
+                variant="outlined"
+                error={!!errors.address}
+                helperText={errors.address?.message}
+                color="success"
+                sx={{ my: 1 }}
+                multiline
+                rows={2}
+              />
+            )}
           />
+
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <RadioGroup
               row
-              aria-labelledby="sell-rent"
-              name="sell-rent-group"
-              value={nonValidatedformData.type}
+              aria-label="listingType"
+              name="listingType"
+              value={nonValidatedFormData.type}
               onChange={(e) =>
-                setNonValidatedformData({ ...nonValidatedformData, type: e.target.value })
+                setNonValidatedFormData({
+                  ...nonValidatedFormData,
+                  type: e.target.value,
+                })
               }
             >
               <FormControlLabel
-                value="sell"
+                value="sale"
                 control={<Radio color="success" />}
-                label="Sell"
+                label="Sale"
               />
               <FormControlLabel
                 value="rent"
@@ -319,9 +324,12 @@ const handleSubmit = async (e) => {
                     color="success"
                     name="ParkingSpot"
                     id="ParkingSpot"
-                    checked={nonValidatedformData.parking}
+                    checked={nonValidatedFormData.parking}
                     onChange={(e) =>
-                      setNonValidatedformData({ ...nonValidatedformData, parking: e.target.checked })
+                      setNonValidatedFormData({
+                        ...nonValidatedFormData,
+                        parking: e.target.checked,
+                      })
                     }
                   />
                 }
@@ -333,9 +341,12 @@ const handleSubmit = async (e) => {
                     color="success"
                     name="Furnished"
                     id="Furnished"
-                    checked={nonValidatedformData.furnished}
+                    checked={nonValidatedFormData.furnished}
                     onChange={(e) =>
-                      setNonValidatedformData({ ...nonValidatedformData, furnished: e.target.checked })
+                      setNonValidatedFormData({
+                        ...nonValidatedFormData,
+                        furnished: e.target.checked,
+                      })
                     }
                   />
                 }
@@ -348,7 +359,10 @@ const handleSubmit = async (e) => {
                     name="Offer"
                     id="Offer"
                     onChange={(e) =>
-                      setNonValidatedformData({ ...nonValidatedformData, offer: e.target.checked })
+                      setNonValidatedFormData({
+                        ...nonValidatedFormData,
+                        offer: e.target.checked,
+                      })
                     }
                   />
                 }
@@ -357,60 +371,84 @@ const handleSubmit = async (e) => {
             </FormGroup>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-            
-            <ValidatedTextField
-              label="Bedrooms"
-              validator={ListingRoomValidator}
-              onChangeFunc={(isValid, value) => {
-                isFormValid.bedrooms = isValid;
-                validatedFormData.bedrooms = value;
-              }}
-              sxProps={{ my: 1 }}
-              type="number"
+            <Controller
+              name="bedrooms"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Bedrooms *"
+                  type="number"
+                  variant="outlined"
+                  sx={{ width: { xs: 180, sm: 300, md: 250 } }}
+                  color="success"
+                  error={!!errors.bedrooms}
+                  helperText={errors.bedrooms?.message}
+                />
+              )}
             />
-            
-            <ValidatedTextField
-              label="Bathrooms"
-              validator={ListingRoomValidator}
-              onChangeFunc={(isValid, value) => {
-                isFormValid.bathrooms = isValid;
-                validatedFormData.bathrooms = value;
-              }}
-              sxProps={{ my: 1 }}
-              type="number"
+
+            <Controller
+              name="bathrooms"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Bathrooms *"
+                  type="number"
+                  variant="outlined"
+                  sx={{ width: { xs: 180, sm: 300, md: 250 } }}
+                  color="success"
+                  error={!!errors.bathrooms}
+                  helperText={errors.bathrooms?.message}
+                />
+              )}
             />
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-            
-            <ValidatedTextField
-              label={
-                nonValidatedformData.type === "rent"
-                  ? "Regular Price ($/Month)"
-                  : "Regular Price ($)"
-              }
-              validator={ListingPriceValidator}
-              onChangeFunc={(isValid, value) => {
-                isFormValid.regularPrice = isValid;
-                validatedFormData.regularPrice = value;
-              }}
-              sxProps={{ my: 1 }}
-              type="number"
+            <Controller
+              name="regularPrice"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={
+                    nonValidatedFormData.type === "rent"
+                      ? "Regular Price ($/Month)"
+                      : "Regular Price ($)"
+                  }
+                  variant="outlined"
+                  sx={{ width: { xs: 180, sm: 300, md: 250 } }}
+                  color="success"
+                  type="number"
+                  error={!!errors.regularPrice}
+                  helperText={errors.regularPrice?.message}
+                />
+              )}
             />
-
-            
-            <ValidatedTextField
-              label={
-                nonValidatedformData.type === "rent"
-                  ? "Discount Price ($/Month)"
-                  : "Discount Price ($)"
-              }
-              validator={ListingPriceValidator}
-              onChangeFunc={(isValid, value) => {
-                isFormValid.discountPrice = isValid;
-                validatedFormData.discountPrice = value;
-              }}
-              sxProps={{ my: 1 }}
-              type="number"
+            <Controller
+              name="discountPrice"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={
+                    nonValidatedFormData.type === "rent"
+                      ? "Discount Price ($/Month)"
+                      : "Discount Price ($)"
+                  }
+                  variant="outlined"
+                  sx={{ width: { xs: 180, sm: 300, md: 250 } }}
+                  color="success"
+                  type="number"
+                  error={!!errors.discountPrice}
+                  helperText={errors.discountPrice?.message}
+                />
+              )}
             />
           </Box>
           <Button
@@ -422,7 +460,7 @@ const handleSubmit = async (e) => {
             disabled={loading}
             color="success"
           >
-            {loading ? "Loading..." : "SAVE CHANGES"}
+            {loading ? "Loading..." : "EDIT LISTING"}
           </Button>
           {error && (
             <Alert sx={{ mb: 2 }} severity="error">
@@ -434,7 +472,14 @@ const handleSubmit = async (e) => {
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
             <strong>Images:</strong> The first image will be the cover (max 6)
           </Typography>
-          
+          {/* <Box sx={{ border: "1px solid grey", p: 2 }}>
+            <input
+              onChange={(evt) => setFiles(Array.from(evt.target.files))}
+              type="file"
+              multiple
+              accept="image/*"
+            />
+          </Box> */}
           <Grid container spacing={2}>
             <Grid item xs={8}>
               <input
@@ -469,7 +514,7 @@ const handleSubmit = async (e) => {
                 fullWidth
                 color="success"
               >
-                {uploading ? "Uploading..." : "Upload Images"}
+                {uploading ? "Uploading..." : "Upload"}
               </Button>
             </Grid>
           </Grid>
@@ -480,32 +525,31 @@ const handleSubmit = async (e) => {
             </Typography>
           )}
           <Box sx={{ display: "flex", flexWrap: "wrap", mt: 3 }}>
-            {nonValidatedformData.imageUrls.length > 0 &&
-              nonValidatedformData.imageUrls.map((url, index) => (
+            {nonValidatedFormData.imageUrls.length > 0 &&
+              nonValidatedFormData.imageUrls.map((url, index) => (
                 <Card
                   key={url}
                   sx={{
-                    width: 220,
+                    width: 250,
                     margin: "auto",
                     borderRadius: 1,
-                    height: 220,
+                    height: 250,
                     textDecoration: "none",
                     mb: 2,
                     bgcolor: "rgb(241, 245, 241)",
                   }}
                 >
-                  <Box sx={{ height: "180px" }}>
+                  <Box sx={{ height: "200px" }}>
                     <CardMedia
                       component="img"
-                      sx={{ height: 180, objectFit: "cover" }}
+                      sx={{ height: 200, objectFit: "cover" }}
                       image={url}
                       alt="property image"
                     />
-                      
                   </Box>
-                  <CardActions >
+                  <CardActions>
                     <Button
-                      sx={{textTransform: "none",alignItems: "center",justifyContent: "center",mt:0,pt:0}}
+                      sx={{ textTransform: "none" }}
                       onClick={() => handleDeleteImage(index)}
                       fullWidth
                       variant="text"
@@ -515,7 +559,6 @@ const handleSubmit = async (e) => {
                     </Button>
                   </CardActions>
                 </Card>
-                
               ))}
           </Box>
         </Grid>

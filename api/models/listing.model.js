@@ -40,7 +40,7 @@ const listingSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ["rent", "sell"],
+        enum: ["rent", "sale"],
         required: true,
     },
     offer: {

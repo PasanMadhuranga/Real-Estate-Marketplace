@@ -107,7 +107,7 @@ export default function Listing() {
               mt={2}
             >
               <Chip
-                label={`For ${listing.type === "sell" ? "Sale" : "Rent"}`}
+                label={`For ${listing.type === "sale" ? "Sale" : "Rent"}`}
                 color="error"
               />
               {listing.offer && (

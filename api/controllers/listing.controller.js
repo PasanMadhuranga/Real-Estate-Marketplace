@@ -89,7 +89,6 @@ export const deleteListing = async (req, res, next) => {
         if (!listing) {
             return next(errorHandler(404, "Listing not found"));
         }
-        console.log(req.user.id);
         if (!listing.userRef.equals(req.user.id)) {
             return next(errorHandler(401, "You can edit only your listings"));
         }
@@ -140,7 +139,7 @@ export const getListings = async (req, res, next) => {
 
         let type = req.query.type;
         if(type === undefined || type === 'all') {
-          type = {$in:['sell', 'rent']};
+          type = {$in:['sale', 'rent']};
         }
 
         const searchTerm = req.query.searchTerm || '';

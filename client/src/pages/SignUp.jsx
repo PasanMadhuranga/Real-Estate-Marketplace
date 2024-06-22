@@ -23,23 +23,7 @@ import { red } from '@mui/material/colors';
 
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-
-const schema = yup.object().shape({
-  username: yup
-    .string()
-    .min(3, "Username must be at least 3 characters long")
-    .matches(
-      /^[a-zA-Z0-9_]+$/,
-      "Username can only contain letters, numbers, and underscores"
-    )
-    .required("Username is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
-  password: yup
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .required("Password is required"),
-});
+import { signupSchema } from "../validationSchemas";
 
 export default function SignUp() {
   const { error, loading } = useSelector((state) => state.user);
@@ -50,7 +34,7 @@ export default function SignUp() {
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(signupSchema),
   });
 
   const dispatch = useDispatch();
@@ -126,7 +110,7 @@ export default function SignUp() {
                     autoFocus
                     variant="outlined"
                     error={!!errors.username}
-                    helperText={errors.username?.message}
+                    helperText={errors.username?.message} // This is similar to errors.username && errors.username.message
                     color="success"
                   />
                 )}
@@ -187,11 +171,6 @@ export default function SignUp() {
             Already have an account? Sign in
           </Link>
         </Box>
-        {/* {error && (
-          <Alert sx={{ mt: 2 }} severity="error">
-            {error}
-          </Alert>
-        )} */}
       </Box>
     </Container>
   );
