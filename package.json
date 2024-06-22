@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@mui/material": "^5.15.20",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
@@ -20,6 +21,7 @@
     "joi": "^17.13.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.1",
+    "react-router-dom": "^6.23.1",
     "safe-buffer": "^5.2.1",
     "sanitize-html": "^2.13.0"
   }
