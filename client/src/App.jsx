@@ -19,7 +19,7 @@ export default function App() {
       <CssBaseline />
       <BrowserRouter>
         <Header />
-        <Box sx={{ flex: '1 0 auto' }}>
+        <Box sx={{ flex: '1 0 auto', backgroundColor: '#f5f5f5' }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/sign-in" element={<SignIn />} />
