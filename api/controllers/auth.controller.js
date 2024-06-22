@@ -18,11 +18,18 @@ export const signup = async (req, res, next) => {
       .status(200)
       .json(restOfUser);
   } catch (error) {
-    next(error);
-    // res.status(500).json(error.message);
-    // this error can be used situations like when we want to raise and error ex: password is not long enough
-    // next(errorHandler(502, error.message));
+    if (error.code === 11000) {
+      // Duplicate key error
+      if (error.keyValue.email) {
+        return res.status(400).json({ message: "Email already exists" });
+      } else if (error.keyValue.username) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+    }
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
+
 };
 
 export const signin = async (req, res, next) => {

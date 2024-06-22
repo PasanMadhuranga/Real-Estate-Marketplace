@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect,useState } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
@@ -15,7 +15,12 @@ import {
   signUpStart,
   signUpSuccess,
   signUpFailure,
+  clearError,
 } from "../redux/user/userSlice";
+
+import Snackbar from '@mui/material/Snackbar';
+import { red } from '@mui/material/colors';
+
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -38,6 +43,7 @@ const schema = yup.object().shape({
 
 export default function SignUp() {
   const { error, loading } = useSelector((state) => state.user);
+  const [open, setOpen] = useState(false); // State to manage Snackbar visibility
 
   const {
     control,
@@ -50,6 +56,25 @@ export default function SignUp() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  //this use to avoid displaying old errors even after refrehsing the page
+  useEffect(() => {
+    dispatch(clearError()); // Clear error state when the component mounts
+  }, [dispatch]);
+
+  // useEffect to open the Snackbar whenever there is an error
+  useEffect(() => {
+    if (error) {
+      setOpen(true); // Open the Snackbar if there's an error
+    }
+  }, [error]); // Dependency array: runs the effect whenever `error` changes
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false); // Close the Snackbar
+    dispatch(clearError()); // Clear error state when Snackbar is closed
+  };
   const onSubmit = async (data) => {
     dispatch(signUpStart());
     try {
@@ -67,6 +92,13 @@ export default function SignUp() {
 
   return (
     <Container component="main" maxWidth="xs">
+      { error && 
+        <Snackbar open={open} autoHideDuration={5000} onClose={handleClose}  anchorOrigin={{vertical:'top',horizontal:'left'}}>
+            <Alert onClose={handleClose} severity="error" variant="filled" sx={{width:'100%',bgcolor:red[400]}}>
+              {error}
+            </Alert>
+        </Snackbar>
+      } 
       <Box
         sx={{
           marginTop: 8,
@@ -155,11 +187,11 @@ export default function SignUp() {
             Already have an account? Sign in
           </Link>
         </Box>
-        {error && (
+        {/* {error && (
           <Alert sx={{ mt: 2 }} severity="error">
             {error}
           </Alert>
-        )}
+        )} */}
       </Box>
     </Container>
   );
