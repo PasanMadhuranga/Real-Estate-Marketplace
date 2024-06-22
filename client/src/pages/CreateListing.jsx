@@ -9,7 +9,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { app } from "../firebase";
 import {
   getStorage,
@@ -30,6 +30,10 @@ import CardActions from "@mui/material/CardActions";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { listingSchema } from "../validationSchemas";
+import Snackbar from "@mui/material/Snackbar";
+import { red } from "@mui/material/colors";
+import { useDispatch } from "react-redux";
+import { clearError } from "../redux/user/userSlice";
 
 export default function CreateListing() {
   const [files, setFiles] = useState([]); //to choose the files
@@ -37,6 +41,7 @@ export default function CreateListing() {
   const [imageUploadError, setImageUploadError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
+  const [open, setOpen] = useState(false); // State to manage Snackbar visibility
 
   // State for non-validated form data
   const [nonValidatedFormData, setNonValidatedFormData] = useState({
@@ -53,11 +58,32 @@ export default function CreateListing() {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(listingSchema),
-  });  
+  });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { currentUser } = useSelector((state) => state.user);
+
+  //this use to avoid displaying old errors even after refrehsing the page
+  useEffect(() => {
+    dispatch(clearError()); // Clear error state when the component mounts
+  }, [dispatch]);
+
+  // useEffect to open the Snackbar whenever there is an error
+  useEffect(() => {
+    if (error) {
+      setOpen(true); // Open the Snackbar if there's an error
+    }
+  }, [error]); // Dependency array: runs the effect whenever `error` changes
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpen(false); // Close the Snackbar
+    dispatch(clearError()); // Clear error state when Snackbar is closed
+  };
 
   // console.log("files:", files);
   const handleImageSubmit = (e) => {
@@ -179,6 +205,23 @@ export default function CreateListing() {
 
   return (
     <Container component="main" maxWidth="lg">
+      {error && (
+        <Snackbar
+          open={open}
+          autoHideDuration={5000}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        >
+          <Alert
+            onClose={handleClose}
+            severity="error"
+            variant="filled"
+            sx={{ width: "100%", bgcolor: red[400] }}
+          >
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
       <Box
         sx={{
           mt: 8,
@@ -428,11 +471,6 @@ export default function CreateListing() {
           >
             {loading ? "Loading..." : "CREATE LISTING"}
           </Button>
-          {error && (
-            <Alert sx={{ mb: 2 }} severity="error">
-              {error}
-            </Alert>
-          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
