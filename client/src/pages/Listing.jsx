@@ -88,11 +88,11 @@ export default function Listing() {
               maxWidth: "lg",
               p: 3,
               m: "auto",
-              mt: 5,
+              mt: 3,
             }}
           >
             <Typography variant="h5" component="h2" gutterBottom>
-              {listing.name} - {listing.regularPrice} $
+              {listing.name} - {listing.regularPrice.toLocaleString()} $
               {listing.type === "rent" && "/Month"}
             </Typography>
 

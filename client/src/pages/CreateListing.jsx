@@ -28,14 +28,38 @@ import { Alert } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardActions from "@mui/material/CardActions";
-import { ListingNameValidator, ListingDescriptionValidator, ListingPriceValidator, ListingRoomValidator, ListingAddressValidator } from "../components/inputValidators";
-import ValidatedTextField from "../components/ValidatedTextField";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+const schema = yup.object().shape({
+  name: yup
+    .string()
+    .required("Name is required")
+    .min(5, "Name must be at least 5 characters long"),
+  description: yup
+    .string()
+    .required("Description is required")
+    .min(50, "Description must be at least 50 characters long"),
+  address: yup
+    .string()
+    .required("Address is required")
+    .min(10, "Address must be at least 10 characters long"),
+  bedrooms: yup.number().required("Bedrooms is required").positive().integer(),
+  bathrooms: yup
+    .number()
+    .required("Bathrooms is required")
+    .positive()
+    .integer(),
+  regularPrice: yup.number().required("Regular Price is required").positive(),
+  discountPrice: yup.number().required("Discount Price is required").positive(),
+});
 
 export default function CreateListing() {
   const [files, setFiles] = useState([]); //to choose the files
   const [loading, setLoading] = useState(false);
-  // const [fileUploadError, setFileUploadError] = useState(false);
-  const [nonValidatedformData, setNonValidatedformData] = useState({
+  // State for non-validated form data
+  const [nonValidatedFormData, setNonValidatedFormData] = useState({
     type: "sell",
     parking: false,
     furnished: false,
@@ -43,24 +67,13 @@ export default function CreateListing() {
     imageUrls: [],
   });
 
-  const isFormValid = useRef({
-    name: false,
-    description: false,
-    address: false,
-    bedrooms: false,
-    bathrooms: false,
-    regularPrice: false,
-    discountPrice: false,
-  });
-
-  const validatedFormData = useRef({
-    name: "",
-    description: "",  
-    address: "",
-    bedrooms: "",
-    bathrooms: "",
-    regularPrice: "",
-    discountPrice: "",
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
   });
 
   const [imageUploadError, setImageUploadError] = useState("");
@@ -75,8 +88,7 @@ export default function CreateListing() {
   const handleImageSubmit = (e) => {
     if (files.length === 0) {
       setImageUploadError("Please select an image");
-    }
-    else if (files.length + nonValidatedformData.imageUrls.length <= 6) {
+    } else if (files.length + nonValidatedFormData.imageUrls.length <= 6) {
       setUploading(true);
       setImageUploadError("");
 
@@ -86,17 +98,18 @@ export default function CreateListing() {
       }
       Promise.all(promises)
         .then((urls) => {
-          console.log("set form data")
-          setNonValidatedformData({
-            ...nonValidatedformData,
-            imageUrls: nonValidatedformData.imageUrls.concat(urls),
-          }
-        );
-          console.log("SetFile to null, inside handleImageSubmit before set error")
+          console.log("set form data");
+          setNonValidatedFormData({
+            ...nonValidatedFormData,
+            imageUrls: nonValidatedFormData.imageUrls.concat(urls),
+          });
+          console.log(
+            "SetFile to null, inside handleImageSubmit before set error"
+          );
           setImageUploadError("");
           setUploading(false);
-          console.log("SetFile to null, inside handleImageSubmit")
-          setFiles([]);/// newly added by pasan
+          console.log("SetFile to null, inside handleImageSubmit");
+          setFiles([]); /// newly added by pasan
         })
         .catch((error) => {
           // console.log(error);
@@ -142,56 +155,32 @@ export default function CreateListing() {
   //(_, i) is the callback function used by filter. The underscore _ represents the current element (which we don't need in this case), and i is the index of the current element.
   const handleDeleteImage = (index) => {
     const storage = getStorage(app);
-    const imageRef = ref(storage, nonValidatedformData.imageUrls[index]);
+    const imageRef = ref(storage, nonValidatedFormData.imageUrls[index]);
     deleteObject(imageRef)
       .then(() => {
         console.log("Image deleted successfully");
-        const newImageUrls = nonValidatedformData.imageUrls.filter((_, i) => i !== index);
-        setNonValidatedformData({ ...nonValidatedformData, imageUrls: newImageUrls });
+        const newImageUrls = nonValidatedFormData.imageUrls.filter(
+          (_, i) => i !== index
+        );
+        setNonValidatedFormData({
+          ...nonValidatedFormData,
+          imageUrls: newImageUrls,
+        });
       })
       .catch((error) => {
         console.log("Error deleting image", error);
       });
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     setLoading(true);
-  //     const body = { ...formData, userRef: currentUser._id };
-  //     if (body.imageUrls.length === 0) {
-  //       setError("Please upload at least one image");
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     if (Number(body.discountPrice) > Number(body.regularPrice)) {
-  //       setError("Discount price cannot be greater than regular price");
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     const response = await axios.post("/api/listing/create", body, {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-  //     setLoading(false);
-  //     if (response.success === false) {
-  //       setError(response.message);
-  //     }
-  //     navigate(`/listing/${response.data._id}`); //redirect to the listing page after creating the listing
-  //   } catch (error) {
-  //     setLoading(false);
-  //     setError(error.response.data.message);
-  //   }
-  // };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      const body = { ...validatedFormData.current, userRef: currentUser._id, ...nonValidatedformData };
+      const body = {
+        ...data,
+        ...nonValidatedFormData,
+        userRef: currentUser._id,
+      };
       if (body.imageUrls.length === 0) {
         setError("Please upload at least one image");
         setLoading(false);
@@ -200,12 +189,6 @@ export default function CreateListing() {
 
       if (Number(body.discountPrice) > Number(body.regularPrice)) {
         setError("Discount price cannot be greater than regular price");
-        setLoading(false);
-        return;
-      }
-
-      if (!Object.values(isFormValid.current).every((isValid) => isValid)) { // Check if all form fields are valid
-        setError("Invalid form data");
         setLoading(false);
         return;
       }
@@ -224,7 +207,7 @@ export default function CreateListing() {
       setLoading(false);
       setError(error.response.data.message);
     }
-  }
+  };
 
   return (
     <Container component="main" maxWidth="lg">
@@ -240,94 +223,84 @@ export default function CreateListing() {
           Create a Listing
         </Typography>
       </Box>
-      <Grid component="form" onSubmit={handleSubmit} container spacing={3}>
-        <Grid item xs={12} md={6} >
-          {/* <TextField
+      <Grid
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        container
+        spacing={3}
+      >
+        <Grid item xs={12} md={6}>
+          <Controller
             name="name"
-            required
-            fullWidth
-            id="name"
-            label="Name"
-            variant="outlined"
-            value={nonValidatedformData.name}
-            onChange={(e) => setNonValidatedformData({ ...nonValidatedformData, name: e.target.value })}
-            sx={{ my: 1 }}
-            color="success"
-          /> */}
-          <ValidatedTextField
-            label="Name *"
-            validator={ListingNameValidator}
-            onChangeFunc={(isValid, value) => {
-              isFormValid.current.name = isValid;
-              validatedFormData.current.name = value;
-            }}
-            sxProps={{ my: 1 }}
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                id="name"
+                label="Name"
+                autoFocus
+                variant="outlined"
+                error={!!errors.name}
+                helperText={errors.name?.message}
+                color="success"
+                sx={{ my: 1 }}
+              />
+            )}
           />
-          {/* <TextField
+          <Controller
             name="description"
-            required
-            fullWidth
-            id="description"
-            label="Description"
-            variant="outlined"
-            inputProps={{ minLength: 10 }}
-            multiline
-            rows={3}
-            value={nonValidatedformData.description}
-            onChange={(e) =>
-              setNonValidatedformData({ ...nonValidatedformData, description: e.target.value })
-            }
-            sx={{ my: 1 }}
-            color="success"
-          /> */}
-          <ValidatedTextField
-            label="Description *"
-            validator={ListingDescriptionValidator}
-            onChangeFunc={(isValid, value) => {
-              isFormValid.current.description = isValid;
-              validatedFormData.current.description = value;
-            }}
-            sxProps={{ my: 1 }}
-            multiline={true}
-            rows={3}
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                id="description"
+                label="Description"
+                variant="outlined"
+                error={!!errors.description}
+                helperText={errors.description?.message}
+                color="success"
+                sx={{ my: 1 }}
+                multiline
+                rows={3}
+              />
+            )}
           />
-          {/* <TextField
+          <Controller
             name="address"
-            required
-            fullWidth
-            id="address"
-            label="Address"
-            autoFocus
-            variant="outlined"
-            multiline
-            rows={2}
-            value={nonValidatedformData.address}
-            onChange={(e) =>
-              setNonValidatedformData({ ...nonValidatedformData, address: e.target.value })
-            }
-            sx={{ my: 1 }}
-            color="success"
-          /> */}
-          <ValidatedTextField
-            label="Address *"
-            validator={ListingAddressValidator}
-            onChangeFunc={(isValid, value) => {
-              isFormValid.current.address = isValid;
-              validatedFormData.current.address = value;
-            }}
-            sxProps={{ my: 1 }}
-            multiline={true}
-            rows={2}
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                id="address"
+                label="Address"
+                variant="outlined"
+                error={!!errors.address}
+                helperText={errors.address?.message}
+                color="success"
+                sx={{ my: 1 }}
+                multiline
+                rows={2}
+              />
+            )}
           />
+
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <RadioGroup
               row
-              aria-labelledby="sell-rent"
-              defaultValue="sell"
-              name="sell-rent-group"
-              value={nonValidatedformData.type}
+              aria-label="listingType"
+              name="listingType"
+              value={nonValidatedFormData.type}
               onChange={(e) =>
-                setNonValidatedformData({ ...nonValidatedformData, type: e.target.value })
+                setNonValidatedFormData({
+                  ...nonValidatedFormData,
+                  type: e.target.value,
+                })
               }
             >
               <FormControlLabel
@@ -349,9 +322,12 @@ export default function CreateListing() {
                     color="success"
                     name="ParkingSpot"
                     id="ParkingSpot"
-                    checked={nonValidatedformData.parking}
+                    checked={nonValidatedFormData.parking}
                     onChange={(e) =>
-                      setNonValidatedformData({ ...nonValidatedformData, parking: e.target.checked })
+                      setNonValidatedFormData({
+                        ...nonValidatedFormData,
+                        parking: e.target.checked,
+                      })
                     }
                   />
                 }
@@ -363,9 +339,12 @@ export default function CreateListing() {
                     color="success"
                     name="Furnished"
                     id="Furnished"
-                    checked={nonValidatedformData.furnished}
+                    checked={nonValidatedFormData.furnished}
                     onChange={(e) =>
-                      setNonValidatedformData({ ...nonValidatedformData, furnished: e.target.checked })
+                      setNonValidatedFormData({
+                        ...nonValidatedFormData,
+                        furnished: e.target.checked,
+                      })
                     }
                   />
                 }
@@ -378,7 +357,10 @@ export default function CreateListing() {
                     name="Offer"
                     id="Offer"
                     onChange={(e) =>
-                      setNonValidatedformData({ ...nonValidatedformData, offer: e.target.checked })
+                      setNonValidatedFormData({
+                        ...nonValidatedFormData,
+                        offer: e.target.checked,
+                      })
                     }
                   />
                 }
@@ -387,115 +369,84 @@ export default function CreateListing() {
             </FormGroup>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-            {/* <TextField
-              label="Bedrooms"
-              type="number"
-              variant="outlined"
+            <Controller
               name="bedrooms"
-              id="bedrooms"
-              sx={{ width: { xs: 200, sm: 300, md: 250 } }}
-              value={nonValidatedformData.bedrooms}
-              onChange={(e) =>
-                setNonValidatedformData({ ...nonValidatedformData, bedrooms: e.target.value })
-              }
-            /> */}
-            <ValidatedTextField
-              label="Bedrooms *"
-              validator={ListingRoomValidator}
-              onChangeFunc={(isValid, value) => {
-                isFormValid.current.bedrooms = isValid;
-                validatedFormData.current.bedrooms = value;
-              }}
-              sxProps={{ width: { xs: 180, sm: 300, md: 250 } }}
-              type="number"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Bedrooms *"
+                  type="number"
+                  variant="outlined"
+                  sx={{ width: { xs: 180, sm: 300, md: 250 } }}
+                  color="success"
+                  error={!!errors.bedrooms}
+                  helperText={errors.bedrooms?.message}
+                />
+              )}
             />
-            {/* <TextField
-              label="Bathrooms"
-              type="number"
-              variant="outlined"
-              // fullWidth
-              sx={{ width: { xs: 200, sm: 300, md: 250 } }}
+
+            <Controller
               name="bathrooms"
-              id="bathrooms"
-              value={nonValidatedformData.bathrooms}
-              onChange={(e) =>
-                setNonValidatedformData({ ...nonValidatedformData, bathrooms: e.target.value })
-              }
-            /> */}
-            <ValidatedTextField
-              label="Bathrooms *"
-              validator={ListingRoomValidator}
-              onChangeFunc={(isValid, value) => {
-                isFormValid.current.bathrooms = isValid;
-                validatedFormData.current.bathrooms = value;
-              }}
-              sxProps={{ width: { xs: 180, sm: 300, md: 250 } }}
-              type="number"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Bathrooms *"
+                  type="number"
+                  variant="outlined"
+                  sx={{ width: { xs: 180, sm: 300, md: 250 } }}
+                  color="success"
+                  error={!!errors.bathrooms}
+                  helperText={errors.bathrooms?.message}
+                />
+              )}
             />
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-            {/* <TextField
-              label={
-                nonValidatedformData.type === "rent"
-                  ? "Regular Price ($/Month)"
-                  : "Regular Price ($)"
-              }
-              type="number"
-              variant="outlined"
-              // fullWidth
-              sx={{ width: { xs: 200, sm: 300, md: 250 } }}
+            <Controller
               name="regularPrice"
-              id="regularPrice"
-              value={nonValidatedformData.regularPrice}
-              onChange={(e) =>
-                setNonValidatedformData({ ...nonValidatedformData, regularPrice: e.target.value })
-              }
-            /> */}
-
-            <ValidatedTextField
-              label={
-                nonValidatedformData.type === "rent"
-                  ? "Regular Price ($/Month)"
-                  : "Regular Price ($)"
-              }
-              validator={ListingPriceValidator}
-              onChangeFunc={(isValid, value) => {
-                isFormValid.current.regularPrice = isValid;
-                validatedFormData.current.regularPrice = value;
-              }}
-              sxProps={{ width: { xs: 180, sm: 300, md: 250 } }}
-              type="number"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={
+                    nonValidatedFormData.type === "rent"
+                      ? "Regular Price ($/Month)"
+                      : "Regular Price ($)"
+                  }
+                  variant="outlined"
+                  sx={{ width: { xs: 180, sm: 300, md: 250 } }}
+                  color="success"
+                  type="number"
+                  error={!!errors.regularPrice}
+                  helperText={errors.regularPrice?.message}
+                />
+              )}
             />
-
-            {/* <TextField
-              label={
-                nonValidatedformData.type === "rent"
-                  ? "Discount Price ($/Month)"
-                  : "Discount Price ($)"
-              }
-              type="number"
-              variant="outlined"
-              sx={{ width: { xs: 200, sm: 300, md: 250 } }}
+            <Controller
               name="discountPrice"
-              id="discountPrice"
-              value={nonValidatedformData.discountPrice}
-              onChange={(e) =>
-                setNonValidatedformData({ ...nonValidatedformData, discountPrice: e.target.value })
-              }
-            /> */}
-            <ValidatedTextField
-              label={
-                nonValidatedformData.type === "rent"
-                  ? "Discount Price ($/Month)"
-                  : "Discount Price ($)"
-              }
-              validator={ListingPriceValidator}
-              onChangeFunc={(isValid, value) => {
-                isFormValid.current.discountPrice = isValid;
-                validatedFormData.current.discountPrice = value;
-              }}
-              sxProps={{ width: { xs: 180, sm: 300, md: 250 } }}
-              type="number"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={
+                    nonValidatedFormData.type === "rent"
+                      ? "Discount Price ($/Month)"
+                      : "Discount Price ($)"
+                  }
+                  variant="outlined"
+                  sx={{ width: { xs: 180, sm: 300, md: 250 } }}
+                  color="success"
+                  type="number"
+                  error={!!errors.discountPrice}
+                  helperText={errors.discountPrice?.message}
+                />
+              )}
             />
           </Box>
           <Button
@@ -572,8 +523,8 @@ export default function CreateListing() {
             </Typography>
           )}
           <Box sx={{ display: "flex", flexWrap: "wrap", mt: 3 }}>
-            {nonValidatedformData.imageUrls.length > 0 &&
-              nonValidatedformData.imageUrls.map((url, index) => (
+            {nonValidatedFormData.imageUrls.length > 0 &&
+              nonValidatedFormData.imageUrls.map((url, index) => (
                 <Card
                   key={url}
                   sx={{
@@ -594,9 +545,9 @@ export default function CreateListing() {
                       alt="property image"
                     />
                   </Box>
-                  <CardActions >
+                  <CardActions>
                     <Button
-                      sx={{ textTransform: "none"}}
+                      sx={{ textTransform: "none" }}
                       onClick={() => handleDeleteImage(index)}
                       fullWidth
                       variant="text"
@@ -606,7 +557,6 @@ export default function CreateListing() {
                     </Button>
                   </CardActions>
                 </Card>
-                
               ))}
           </Box>
         </Grid>
