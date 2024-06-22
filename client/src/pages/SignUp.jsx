@@ -16,41 +16,63 @@ import {
   signUpSuccess,
   signUpFailure,
 } from "../redux/user/userSlice";
+import { usernameValidator, emailValidator, passwordValidator } from "../components/inputValidators";
+import ValidatedTextField from "../components/ValidatedTextField";
+import { useRef } from "react";
 
 export default function SignUp() {
-  // const [error, setError] = useState(null);
-  // const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({username: "", email: "", password: ""});
+  const isFormValid = useRef({ username: false, email: false, password: false });
+  const formData = useRef({ username: "", email: "", password: "" });
   const { error, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   dispatch(signUpStart());
+  //   // FormData is a built-in JavaScript object that easily captures the data from the form fields.
+  //   // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
+  //   const body = {...formData};
+
+  //   try {
+  //     const response = await axios.post("/api/auth/signup", body, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     dispatch(signUpSuccess(response.data));
+  //     navigate("/");
+  //   } catch (error) {
+  //     // this error is an Axios error object, which contains a response object with the error message.
+  //     dispatch(signUpFailure(error.response.data.message));
+  //   }
+  //   // "/api/users": The URL to which the request is sent. This is typically an endpoint on your server that handles user registration.
+  //   // method: "POST": Specifies that this is a POST request, meaning data will be sent to the server.
+  //   // headers: {"Content-Type": "application/json"}: Sets the Content-Type header to application/json, indicating that the request body contains JSON data.
+  //   // body: JSON.stringify(body): Converts the body object (which contains the form data) to a JSON string to be sent as the request body.
+  // };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     dispatch(signUpStart());
-    // FormData is a built-in JavaScript object that easily captures the data from the form fields.
-    // event.currentTarget refers to the form element, and new FormData(event.currentTarget) captures all the form data in a structured way.
-    const data = new FormData(event.currentTarget);
-    const body = {...formData};
-
-    try {
-      const response = await axios.post("/api/auth/signup", body, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      dispatch(signUpSuccess(response.data));
-      navigate("/");
-    } catch (error) {
-      // this error is an Axios error object, which contains a response object with the error message.
-      dispatch(signUpFailure(error.response.data.message));
+    if (Object.values(isFormValid.current).every((isValid) => isValid)) {
+      const body = { ...formData.current };
+      try {
+        const response = await axios.post("/api/auth/signup", body, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        dispatch(signUpSuccess(response.data));
+        navigate("/");
+      } catch (error) {
+        dispatch(signUpFailure(error.response.data.message));
+      }
+    } else {
+      dispatch(signUpFailure("Invalid form data"));
     }
-    // "/api/users": The URL to which the request is sent. This is typically an endpoint on your server that handles user registration.
-    // method: "POST": Specifies that this is a POST request, meaning data will be sent to the server.
-    // headers: {"Content-Type": "application/json"}: Sets the Content-Type header to application/json, indicating that the request body contains JSON data.
-    // body: JSON.stringify(body): Converts the body object (which contains the form data) to a JSON string to be sent as the request body.
-  };
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -68,7 +90,7 @@ export default function SignUp() {
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
+              {/* <TextField
                 name="username"
                 required
                 fullWidth
@@ -78,10 +100,18 @@ export default function SignUp() {
                 variant="outlined"
                 value={formData.username}
                 onChange={(e) => setFormData({...formData, username: e.target.value})}
+              /> */}
+              <ValidatedTextField
+                label="Username"
+                validator={usernameValidator}
+                onChangeFunc={(isValid, value) => {
+                  isFormValid.current.username = isValid;
+                  formData.current.username = value;
+                }}
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
+              {/* <TextField
                 required
                 fullWidth
                 id="email"
@@ -91,10 +121,18 @@ export default function SignUp() {
                 value={formData.email}
                 variant="outlined"
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
+              /> */}
+              <ValidatedTextField
+                label="Email"
+                validator={emailValidator}
+                onChangeFunc={(isValid, value) => {
+                  isFormValid.current.email = isValid;
+                  formData.current.email = value;
+                }}
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField
+              {/* <TextField
                 required
                 fullWidth
                 name="password"
@@ -105,6 +143,14 @@ export default function SignUp() {
                 variant="outlined"
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
+              /> */}
+              <ValidatedTextField
+                label="Password"
+                validator={passwordValidator}
+                onChangeFunc={(isValid, value) => {
+                  isFormValid.current.password = isValid;
+                  formData.current.password = value;
+                }}
               />
             </Grid>
           </Grid>

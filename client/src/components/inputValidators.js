@@ -1,0 +1,67 @@
+export const emptyValidator = (value) => {
+  if (!value.trim()) return "value is empty";
+  return false;
+};
+
+export const usernameValidator = (value) => {
+  if (!/^[a-zA-Z0-9_]+$/.test(value))
+    return "can only contain letters, numbers, and underscores";
+  return false;
+};
+
+export const intervalValidator = (value, min, max) => {
+  const numValue = parseFloat(value);
+
+  if (isNaN(numValue) || numValue < numMin || numValue > numMax)
+    return `value must be between ${min} and ${max}`;
+  return false;
+};
+
+export const passwordValidator = (value) => {
+  if (value.length < 8) {
+    return "must contain at least 8 characters";
+  }
+  if (!/[A-Z]/.test(value)) {
+    return "must contain at least one uppercase letter";
+  }
+  if (!/[a-z]/.test(value)) {
+    return "must contain at least one lowercase letter";
+  }
+  if (!/[0-9]/.test(value)) {
+    return "must contain at least one number";
+  }
+  return false;
+};
+
+export const emailValidator = (value) => {
+  if (!/^[a-zA-Z0-9._:$!%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$/.test(value))
+    return "must be a valid email address";
+  return false;
+};
+
+export const ListingNameValidator = (value) => {
+  if (value.trim().length < 5) {
+    return "must contain at least 5 characters";
+  }
+  return false;
+};
+
+export const ListingDescriptionValidator = (value) => {
+  if (value.trim().length < 50) {
+    return "must contain at least 50 characters";
+  }
+};
+
+export const ListingPriceValidator = (value) => {
+  if (parseInt(value) <= 0) {
+    return "must be a positive number";
+  }
+  return false;
+};
+
+export const ListingRoomValidator = (value) => {
+  if (parseInt(value) <= 0 || parseInt(value) > 20) {
+    return "must be between 1 and 10";
+  }
+  return false;
+};
