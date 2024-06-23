@@ -55,10 +55,7 @@ export const deleteUser = async (req, res, next) => {
     const user = await User.findById(req.params.id);
     if (!user) return next(errorHandler(404, "User not found"));
 
-    // Delete all listings of the user
-    await Listing.deleteMany({ userRef: user._id });
-
-    // Delete the user
+    // Delete the user (Listings deletion is handled in the post-hook)
     await User.findByIdAndDelete(req.params.id);
 
     res.clearCookie("access_token");

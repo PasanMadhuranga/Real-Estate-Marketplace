@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Listing from "./listing.model.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -29,6 +30,13 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Post hook to delete associated listings after a user is deleted
+userSchema.post("findOneAndDelete", async function (user) {
+  if (user.listings.length) {
+    await Listing.deleteMany({ _id: { $in: user.listings } });
+  }
+});
 
 const User = mongoose.model("User", userSchema);
 
