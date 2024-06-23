@@ -109,3 +109,15 @@ export const signout = (req, res, next) => {
     next(error);
   }
 };
+
+
+export const getAuthUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return next(errorHandler(404, "User not found"));
+    const { password, ...restOfUser } = user._doc
+    res.status(200).json(restOfUser);
+  } catch (error) {
+    next(error);
+  }
+}

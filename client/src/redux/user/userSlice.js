@@ -34,9 +34,6 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
-    clearError: (state) => {
-      state.error = null;
-    },
     //these three reducers are for updating the user profile
     updateUserStart: (state) => {
       state.loading = true;
@@ -74,6 +71,19 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
+    setUpUser: (state, action) => {
+      state.currentUser = action.payload;
+      state.loading = false;
+      state.error = null;
+    },
+    deleteUser: (state) => {
+      state.currentUser = null;
+      state.loading = false;
+      state.error = null;
+    }
   },
 });
 
@@ -94,6 +104,8 @@ export const {
   signUpSuccess,
   signUpFailure,
   clearError,
+  setUpUser,
+  deleteUser,
 } = userSlice.actions;
 
 export default userSlice.reducer;
