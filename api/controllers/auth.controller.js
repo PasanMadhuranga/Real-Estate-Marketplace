@@ -110,7 +110,7 @@ export const signout = (req, res, next) => {
   }
 };
 
-
+// This sends the authenticared user data back to the client so that he can update the redux storage
 export const getAuthUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);

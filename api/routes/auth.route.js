@@ -15,5 +15,5 @@ router.post("/signup", validateSignUp, signup);
 router.post("/signin", validateSignIn, signin);
 router.post("/google", validateGoogleLogin, google);
 router.get("/signout", verifyToken, signout);
-router.get("/check-auth", verifyToken, getAuthUser);
+router.get("/check-auth", verifyToken, getAuthUser); // This route is to check if the user has a valid token
 export default router;

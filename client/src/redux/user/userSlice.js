@@ -74,11 +74,13 @@ const userSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    // This reducer is to set the user data in the state related to check-auth route
     setUpUser: (state, action) => {
       state.currentUser = action.payload;
       state.loading = false;
       state.error = null;
     },
+    // This reducer is to delete the user data from the state related to check-auth route
     deleteUser: (state) => {
       state.currentUser = null;
       state.loading = false;

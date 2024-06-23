@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
 import { Outlet, Navigate } from "react-router-dom";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -12,6 +11,7 @@ export default function PrivateRoute() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const dispatch = useDispatch();
 
+  // This make sure that if there is a cookie the redux torage is updated to the logged in user, otherwise the redux storage is cleared
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -19,7 +19,6 @@ export default function PrivateRoute() {
         setIsAuthenticated(true);
         dispatch(setUpUser(response.data));
       } catch (error) {
-        console.log(error);
         setIsAuthenticated(false);
         dispatch(deleteUser());
       }
