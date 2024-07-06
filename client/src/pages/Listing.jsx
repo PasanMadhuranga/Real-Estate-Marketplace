@@ -3,7 +3,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Oval } from "react-loader-spinner";
 import ImageSlider from "../components/ImageSlider";
-import { Box, Typography, Button, Chip, Divider, Alert,Grid } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  Divider,
+  Alert,
+  Grid,
+} from "@mui/material";
 import BedIcon from "@mui/icons-material/Bed";
 import BathtubIcon from "@mui/icons-material/Bathtub";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
@@ -13,12 +21,15 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useSelector } from "react-redux";
 import Contact from "../components/Contact";
 import { useNavigate } from "react-router-dom";
+import WarningDialog from "../components/WarningDialog";
 
 export default function Listing() {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [contact, setContact] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+
   const { listingId } = useParams();
   const { currentUser } = useSelector((state) => state.user);
 
@@ -45,12 +56,12 @@ export default function Listing() {
 
   const handleDeleteListing = async () => {
     try {
-      await axios.delete(`/api/listing/delete/${listingId}`);;
+      await axios.delete(`/api/listing/delete/${listingId}`);
       navigate("/profile");
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   return (
     <>
@@ -111,11 +122,13 @@ export default function Listing() {
                 color="error"
               />
               {listing.offer && (
-              <Chip
-                label={`$${listing.regularPrice - listing.discountPrice} discount`}
-                color="success"
-              />
-            )}
+                <Chip
+                  label={`$${
+                    listing.regularPrice - listing.discountPrice
+                  } discount`}
+                  color="success"
+                />
+              )}
             </Box>
             <Divider sx={{ my: 2 }} />
             <Typography variant="body1" gutterBottom>
@@ -125,85 +138,123 @@ export default function Listing() {
               display="flex"
               justifyContent="space-between"
               alignItems="center"
-              sx={{mt: 2}}
+              sx={{ mt: 2 }}
             >
-            <Grid container>
-              <Grid item xs={6} sm={3} sx={{mb:3}}>
-                <Box display="flex" alignItems="center" justifyContent="start">
-                  <BedIcon color="secondary" />
-                  <Typography variant="body2" ml={1}>
-                    {listing.bedrooms} Beds
-                  </Typography>
-                </Box>
-              </Grid> 
+              <Grid container>
+                <Grid item xs={6} sm={3} sx={{ mb: 3 }}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="start"
+                  >
+                    <BedIcon color="secondary" />
+                    <Typography variant="body2" ml={1}>
+                      {listing.bedrooms} Beds
+                    </Typography>
+                  </Box>
+                </Grid>
 
-              <Grid item xs={6} sm={3} sx={{ mb:3 }}>
-                <Box display="flex" alignItems="center" justifyContent="start">
-                  <BathtubIcon color="secondary" />
-                  <Typography variant="body2" ml={1}>
-                    {listing.bathrooms} Baths
-                  </Typography>
-                </Box>
-              </Grid>
+                <Grid item xs={6} sm={3} sx={{ mb: 3 }}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="start"
+                  >
+                    <BathtubIcon color="secondary" />
+                    <Typography variant="body2" ml={1}>
+                      {listing.bathrooms} Baths
+                    </Typography>
+                  </Box>
+                </Grid>
 
-              <Grid item xs={6} sm={3} sx={{ mb:3 }}>
-                <Box display="flex" alignItems="center" justifyContent="start">
-                  <DirectionsCarIcon
-                    color={listing.parking ? "secondary" : "disabled"}
-                  />
-                  
-                  <Typography variant="body2" ml={1}>
-                    {listing.parking ? "Parking" : "No Parking"}
-                  </Typography>
-                </Box>
-              </Grid>
+                <Grid item xs={6} sm={3} sx={{ mb: 3 }}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="start"
+                  >
+                    <DirectionsCarIcon
+                      color={listing.parking ? "secondary" : "disabled"}
+                    />
 
-              <Grid item xs={6} sm={3}>
-                <Box display="flex" alignItems="center" justifyContent="start">
-                  {listing.furnished ? (
-                    <>
-                      <CheckIcon color="success" />
-                      <Typography variant="body2" ml={1}>
-                        Furnished
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <CloseIcon color="error" />
-                      <Typography variant="body2" ml={1}>
-                        Not Furnished
-                      </Typography>
-                    </>
-                  )}
-                  {/* <CheckIcon color="primary" /> */}
-                </Box>
+                    <Typography variant="body2" ml={1}>
+                      {listing.parking ? "Parking" : "No Parking"}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={6} sm={3}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="start"
+                  >
+                    {listing.furnished ? (
+                      <>
+                        <CheckIcon color="success" />
+                        <Typography variant="body2" ml={1}>
+                          Furnished
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <CloseIcon color="error" />
+                        <Typography variant="body2" ml={1}>
+                          Not Furnished
+                        </Typography>
+                      </>
+                    )}
+                    {/* <CheckIcon color="primary" /> */}
+                  </Box>
                 </Grid>
               </Grid>
             </Box>
-            {currentUser && (currentUser._id !== listing.userRef ? (contact ? (
-              <Contact listing={listing} />
-            ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                sx={{ mt: 3 }}
-                onClick={() => setContact(true)}
-              >
-                contact landlord
-              </Button>
-            )): <>
-            <Button variant="contained" size="small" color="info" href={`/edit-listing/${listing._id}`}>Edit</Button>
-            <Button
-            variant="contained"
-            color="error"
-            size="small"
-            onClick={handleDeleteListing}
-            sx={{ml:3}}
-          >
-            Delete
-          </Button>
-            </>)}
+            {currentUser &&
+              (currentUser._id !== listing.userRef ? (
+                contact ? (
+                  <Contact listing={listing} />
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ mt: 3 }}
+                    onClick={() => setContact(true)}
+                  >
+                    contact landlord
+                  </Button>
+                )
+              ) : (
+                <>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    color="info"
+                    href={`/edit-listing/${listing._id}`}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    onClick={() => setOpenDialog(true)}
+                    sx={{ ml: 3 }}
+                  >
+                    Delete
+                  </Button>
+                  <WarningDialog
+                    handleClose={() => setOpenDialog(false)}
+                    open={openDialog}
+                    title={"Are you sure you want to delete this listing?"}
+                    subtitle={
+                      "All the listing data will be lost and you won't be able to recover it."
+                    }
+                    deleteBtnText={"Delete Listing"}
+                    handleDelete={handleDeleteListing}
+                  />
+                </>
+              ))}
           </Box>
         </>
       )}

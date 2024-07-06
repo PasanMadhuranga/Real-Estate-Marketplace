@@ -10,8 +10,11 @@ import {
 } from "@mui/material";
 import theme from "../themes/theme";
 import { ThemeProvider } from "@mui/material/styles";
+import WarningDialog from "./WarningDialog";
+import { useState } from "react";
 
 export default function ListingCard({ id, handleDeleteListing, imgUrl, name }) {
+  const [openDialog, setOpenDialog] = useState(false);
   return (
     <ThemeProvider theme={theme}>
       <Card
@@ -51,7 +54,6 @@ export default function ListingCard({ id, handleDeleteListing, imgUrl, name }) {
             </Typography>
           </Link>
         </CardContent>
-        {/* <Box sx={{ display: "flex", justifyContent: "flex-end"}}> */}
         <CardActions sx={{ pr: 2 }}>
           <Button
             variant="contained"
@@ -65,12 +67,21 @@ export default function ListingCard({ id, handleDeleteListing, imgUrl, name }) {
             variant="contained"
             color="error"
             size="small"
-            onClick={handleDeleteListing}
+            onClick={() => setOpenDialog(true)}
           >
             Delete
           </Button>
+          <WarningDialog
+            open={openDialog}
+            handleClose={() => setOpenDialog(false)}
+            title={"Are you sure you want to delete this listing?"}
+            subtitle={
+              "All the listing data will be lost and you won't be able to recover it."
+            }
+            deleteBtnText="Delete"
+            handleDelete={() => handleDeleteListing(id)}
+          />
         </CardActions>
-        {/* </Box> */}
       </Card>
     </ThemeProvider>
   );
