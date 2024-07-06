@@ -5,6 +5,7 @@ import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import listingRouter from "./routes/listing.route.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,14 @@ app.use(cookieParser())
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use('/api/listing', listingRouter);
+
+//The cors() middleware is used to enable Cross-Origin Resource Sharing (CORS) in an Express.js application
+//CORS is a mechanism that allows resources on a web page to be requested from another domain outside the domain from which the resource originated
+//This middleware is used to allow requests from all origins and with credentials
+app.use(cors({
+  origin: 'http://localhost:5173', // frontend URL
+  credentials: true, // Allow credentials (cookies) to be included in requests
+}));
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
