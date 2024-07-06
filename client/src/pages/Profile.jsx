@@ -151,6 +151,25 @@ export default function Profile() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const response = await axios.delete(
+        `/api/user/delete/${currentUser._id}`
+      );
+      if (response.success === false) {
+        dispatch(deleteUserFailure(response.message));
+        return;
+      }
+      dispatch(deleteUserSuccess());
+      setOpenDialog(false);
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+      dispatch(deleteUserFailure(error.response));
+    }
+  };
+
   const handleShowListings = async () => {
     try {
       setShowListingsError(false);
@@ -322,6 +341,7 @@ export default function Profile() {
               <WarningDialog
                 handleClose={() => setOpenDialog(false)}
                 open={openDialog}
+                handleDelete={handleDeleteUser}
                 title={
                   "Are you sure you want to delete your account?"
                 }
