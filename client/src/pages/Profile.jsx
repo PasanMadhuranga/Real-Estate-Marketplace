@@ -21,7 +21,7 @@ import {
   signOutUserStart,
   signOutUserSuccess,
   signOutUserFailure,
-  clearError
+  clearError,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
@@ -32,12 +32,14 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import ListingCard from "../components/ListingCard";
+import WarningDialog from "../components/WarningDialog";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { updateProfileSchema } from "../validationSchemas";
-
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const fileRef = useRef(null);
   //get the current user to get the avatar
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -50,6 +52,9 @@ export default function Profile() {
   const [showListingsError, setShowListingsError] = useState(false);
   const [listings, setListings] = useState([]);
   const [listingsLoaded, setListingsLoaded] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [avatar, setAvatar] = useState("");
+
   //initialize dispatch to use it to dispatch actions
   const dispatch = useDispatch();
 
@@ -87,14 +92,13 @@ export default function Profile() {
       },
       () => {
         //getDownloadURL(uploadTask.snapshot.ref) retrieves the download URL for the uploaded file.
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-          setAvatar(downloadURL) //set the avatar to the download url of the uploaded file
+        getDownloadURL(uploadTask.snapshot.ref).then(
+          (downloadURL) => setAvatar(downloadURL) //set the avatar to the download url of the uploaded file
         );
       }
     );
   };
 
-  const [avatar, setAvatar] = useState("");
 
   //this is the form validation using yup
   const {
@@ -110,7 +114,7 @@ export default function Profile() {
     // event.preventDefault();
     dispatch(updateUserStart());
     // const data = new FormData(event.currentTarget);
-    const body = {...data, avatar: avatar || currentUser.avatar};
+    const body = { ...data, avatar: avatar || currentUser.avatar };
     try {
       const response = await axios.post(
         `/api/user/update/${currentUser._id}`,
@@ -129,22 +133,6 @@ export default function Profile() {
       setUpdateSuccess(true); // This is used to show the success message
     } catch (error) {
       dispatch(updateUserFailure(error.response.data.message));
-    };
-  };
-
-  const handleDeleteUser = async () => {
-    try {
-      dispatch(deleteUserStart());
-      const response = await axios.delete(
-        `/api/user/delete/${currentUser._id}`
-      );
-      if (response.success === false) {
-        dispatch(deleteUserFailure(response.message));
-        return;
-      }
-      dispatch(deleteUserSuccess());
-    } catch (error) {
-      dispatch(deleteUserFailure(error.response.data.message));
     }
   };
 
@@ -157,6 +145,7 @@ export default function Profile() {
         return;
       }
       dispatch(signOutUserSuccess());
+      navigate("/sign-in");
     } catch (error) {
       dispatch(signOutUserFailure(error.response.data.message));
     }
@@ -184,11 +173,12 @@ export default function Profile() {
       if (response.success === false) {
         return;
       }
-      setListings(prevListings => prevListings.filter(listing => listing._id !== id));
+      setListings((prevListings) =>
+        prevListings.filter((listing) => listing._id !== id)
+      );
     } catch (error) {}
   };
 
-  
   return (
     <>
       <Container component="main" maxWidth="xs">
@@ -205,104 +195,106 @@ export default function Profile() {
           </Typography>
           {/* fileRef.current gives direct access to the file input element because fileRef is a reference to that element.
         fileRef.current.click() programmatically triggers a click event on the hidden file input element. This opens the file dialog, allowing the user to select a file. */}
-        <input
-          onChange={(evt) => setFile(evt.target.files[0])}
-          type="file"
-          ref={fileRef}
-          hidden
-          accept="image/*"
-        />
-        <Avatar
-          onClick={() => fileRef.current.click()}
-          src={avatar || currentUser.avatar}
-          alt="profile"
-          sx={{ mt: 2, bgcolor: "secondary.main", width: 100, height: 100 }}
-        />
-        {/* //this p elemnt implements the showing of the progress of the file upload */}
-        <p>
-          {fileUploadError ? (
-            <small >
-              Error Image upload (image must be less than 5 mb)
-            </small>
-          ) : filePerc > 0 && filePerc < 100 ? (
-            <small>{`Uploading ${filePerc}%`}</small>
-          ) : filePerc === 100 ? (
-            <small >Image successfully uploaded!</small>
-          ) : (
-            ""
-          )}
-        </p>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Controller
-                name="username"
-                control={control}
-                defaultValue={currentUser.username} //since we use redux ,we had not have to use the reset function to reset the form
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    id="username"
-                    label="Username"
-                    autoFocus
-                    color="success"
-                    variant="outlined"
-                    error={!!errors.username}
-                    helperText={errors.username?.message} // This is similar to errors.username && errors.username.message
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name="email"
-                control={control}
-                defaultValue={currentUser.email}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    variant="outlined"
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                    color="success"
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name="password"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    id="password"
-                    label="Password"
-                    type="password"
-                    variant="outlined"
-                    error={!!errors.password}
-                    helperText={errors.password?.message}
-                    color="success"
-                  />
-                )}
-              />
-            </Grid>
-          </Grid>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={loading}
+          <input
+            onChange={(evt) => setFile(evt.target.files[0])}
+            type="file"
+            ref={fileRef}
+            hidden
+            accept="image/*"
+          />
+          <Avatar
+            onClick={() => fileRef.current.click()}
+            src={avatar || currentUser?.avatar || ""} // if the avatar is not uploaded, the current user avatar will be shown
+            alt="profile"
+            sx={{ mt: 2, bgcolor: "secondary.main", width: 100, height: 100 }}
+          />
+          {/* //this p elemnt implements the showing of the progress of the file upload */}
+          <p>
+            {fileUploadError ? (
+              <small>Error Image upload (image must be less than 5 mb)</small>
+            ) : filePerc > 0 && filePerc < 100 ? (
+              <small>{`Uploading ${filePerc}%`}</small>
+            ) : filePerc === 100 ? (
+              <small>Image successfully uploaded!</small>
+            ) : (
+              ""
+            )}
+          </p>
+          <Box
+            component="form"
+            onSubmit={handleSubmit(onSubmit)}
+            sx={{ mt: 3 }}
           >
-            {loading ? "Loading..." : "UPDATE"}
-          </Button>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Controller
+                  name="username"
+                  control={control}
+                  defaultValue={currentUser?.username || ""} //since we use redux ,we had not have to use the reset function to reset the form
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      id="username"
+                      label="Username"
+                      autoFocus
+                      color="success"
+                      variant="outlined"
+                      error={!!errors.username}
+                      helperText={errors.username?.message} // This is similar to errors.username && errors.username.message
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name="email"
+                  control={control}
+                  defaultValue={currentUser?.email || ""}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      id="email"
+                      label="Email Address"
+                      variant="outlined"
+                      error={!!errors.email}
+                      helperText={errors.email?.message}
+                      color="success"
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name="password"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      id="password"
+                      label="Password"
+                      type="password"
+                      variant="outlined"
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                      color="success"
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
+            >
+              {loading ? "Loading..." : "UPDATE"}
+            </Button>
 
             <Button
               type="text"
@@ -322,12 +314,22 @@ export default function Profile() {
                   variant="text"
                   color="error"
                   sx={{ textTransform: "none", pl: 1 }}
-                  onClick={handleDeleteUser}
+                  onClick={() => setOpenDialog(true)}
                 >
                   Delete Account
                 </Button>
               </Grid>
-
+              <WarningDialog
+                handleClose={() => setOpenDialog(false)}
+                open={openDialog}
+                title={
+                  "Are you sure you want to delete your account?"
+                }
+                subtitle={
+                  "Deleting your account will permanently remove all your data including your listings and cannot be undone."
+                }
+                deleteBtnText={"Delete My Account"}
+              />
               <Grid item xs={6} style={{ textAlign: "right" }}>
                 <Button
                   variant="text"
@@ -365,40 +367,40 @@ export default function Profile() {
         )}
       </Container>
 
-      {listingsLoaded && (listings.length === 0 ? (
-        <Container maxWidth="sm">
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            sx={{ mb: 3 }}
-          >
-            <Alert severity="error">No Listings Available</Alert>
-          </Box>
-        </Container>
-      ) : (
-        <Container maxWidth="sm">
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            sx={{ mb: 3 }}
-          >
-            <Typography variant="h4">Your Listings</Typography>
-          </Box>
-          {listings.map((listing) => (
-            <ListingCard
-              key={listing._id} //this is the unique id of the listing. It is used to identify the listing, it doesnt not pass as a prop to the ListingCard component
-              id={listing._id}
-              imgUrl={listing.imageUrls[0]}
-              name={listing.name}
-              handleDeleteListing={() => deleteListing(listing._id)}
-            />
-          ))
-          }
-          {/* {listings.map((lis) =>console.log(lis._id) )} */}
-        </Container>
-      ))}
+      {listingsLoaded &&
+        (listings.length === 0 ? (
+          <Container maxWidth="sm">
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              sx={{ mb: 3 }}
+            >
+              <Alert severity="error">No Listings Available</Alert>
+            </Box>
+          </Container>
+        ) : (
+          <Container maxWidth="sm">
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              sx={{ mb: 3 }}
+            >
+              <Typography variant="h4">Your Listings</Typography>
+            </Box>
+            {listings.map((listing) => (
+              <ListingCard
+                key={listing._id} //this is the unique id of the listing. It is used to identify the listing, it doesnt not pass as a prop to the ListingCard component
+                id={listing._id}
+                imgUrl={listing.imageUrls[0]}
+                name={listing.name}
+                handleDeleteListing={() => deleteListing(listing._id)}
+              />
+            ))}
+            {/* {listings.map((lis) =>console.log(lis._id) )} */}
+          </Container>
+        ))}
     </>
   );
 }
