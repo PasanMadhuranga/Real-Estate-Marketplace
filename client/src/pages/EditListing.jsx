@@ -134,7 +134,7 @@ export default function EditListing() {
   const handleImageSubmit = (e) => {
     if (files.length === 0) {
       setImageUploadError("Please select an image");
-    } else if (files.length + formData.imageUrls.length <= 6) {
+    } else if (files.length + nonValidatedFormData.imageUrls.length <= 6) {
       setUploading(true);
       setImageUploadError("");
 
@@ -145,8 +145,8 @@ export default function EditListing() {
       Promise.all(promises)
         .then((urls) => {
           setFormData({
-            ...formData,
-            imageUrls: formData.imageUrls.concat(urls),
+            ...nonValidatedFormData,
+            imageUrls: nonValidatedFormData.imageUrls.concat(urls),
           });
           setImageUploadError("");
           setUploading(false);
@@ -195,11 +195,11 @@ export default function EditListing() {
   //(_, i) is the callback function used by filter. The underscore _ represents the current element (which we don't need in this case), and i is the index of the current element.
   const handleDeleteImage = (index) => {
     const storage = getStorage(app);
-    const imageRef = ref(storage, formData.imageUrls[index]);
+    const imageRef = ref(storage, nonValidatedFormData.imageUrls[index]);
     deleteObject(imageRef)
       .then(() => {
-        const newImageUrls = formData.imageUrls.filter((_, i) => i !== index);
-        setFormData({ ...formData, imageUrls: newImageUrls });
+        const newImageUrls = nonValidatedFormData.imageUrls.filter((_, i) => i !== index);
+        setFormData({ ...nonValidatedFormData, imageUrls: newImageUrls });
       })
       .catch((error) => {
         setError("Failed to delete image");
