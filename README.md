@@ -4,7 +4,7 @@
 
 ## Overview
 
-The **Real Estate Marketplace** is a modern and user-friendly web application designed to help users find their perfect place. Whether they are looking to buy or rent, this platform offers a seamless experience to discover and manage real estate properties. Developed by [Pasan Madhuranga](https://github.com/PasanMadhuranga) and Dimalsha, this project leverages the latest web technologies to create an engaging and intuitive interface for users.
+The **Real Estate Marketplace** is a modern and user-friendly web application designed to help users find their perfect place. Whether they are looking to buy or rent, this platform offers a seamless experience to discover and manage real estate properties. Developed by [Pasan Madhuranga](https://github.com/PasanMadhuranga) and [Dimalsha](http://github.com/DimalshaMadushani), this project leverages the latest web technologies to create an engaging and intuitive interface for users.
 
 ## Features
 
