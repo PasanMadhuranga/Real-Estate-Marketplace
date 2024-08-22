@@ -29,10 +29,10 @@ The **Real Estate Marketplace** is a modern and user-friendly web application de
 ### 5. Image Upload
 - **Firebase Image Upload**: Property images can be uploaded directly to Firebase, ensuring fast and reliable image storage and retrieval.
 
-### 7. Responsive Design
+### 6. Responsive Design
 - **Mobile-Friendly**: The application is fully responsive, ensuring a great user experience on both desktop and mobile devices.
 
-### 9. Security Features
+### 7. Security Features
 - **Secure Authentication**: User data is protected using industry-standard encryption techniques.
 - **Role-Based Access Control**: Different access levels are provided for users.
 
